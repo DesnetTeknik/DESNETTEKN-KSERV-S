@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teknik Servis & Cihaz Sorgulama</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Teknik Servis Takip Sistemi</h1>
+        <!-- Sekme Geçiş Butonları -->
+        <div class="sekme-butonlari">
+            <button class="sekme-btn active" onclick="sekmeDegistir('musteri-paneli')">Müşteri Sorgulama</button>
+            <button class="sekme-btn" onclick="sekmeDegistir('yonetici-paneli')">Yönetici Paneli</button>
+        </div>
+    </header>
+
+    <main>
+      <main>
+    <!-- 1. BÖLÜM: MÜŞTERİ SORGULAMA EKRANI -->
+    <section id="musteri-paneli" class="sekme-icerik active">
+        <div class="sorgu-kutusu">
+            <h2>Cihaz Durumu Sorgulama</h2>
+            <p>Cihazınızın durumunu öğrenmek için Firma Adı veya Seri No (S/N) giriniz.</p>
+            <div class="arama-formu">
+                <input type="text" id="musteri-sorgu-input" placeholder="Örn: Desnet veya S/N: 123456">
+                <button onclick="musteriSorgula()" class="btn-sorgula">Sorgula</button>
+            </div>
+        </div>
+        
+        <div id="musteri-sonuc" class="sorgu-sonuc-alani"></div>
+    </section>
+
+    <!-- 2. BÖLÜM: YÖNETİCİ PANELİ -->
+    <section id="yonetici-paneli" class="sekme-icerik">
+        <div class="kartlar-container">
+            <div class="kart"><h2>Toplam Cihaz</h2><p id="toplam-sayi">0</p></div>
+            <div class="kart"><h2>Bekleyen</h2><p id="bekleyen-sayi">0</p></div>
+            <div class="kart"><h2>İşlemde</h2><p id="islemde-sayi">0</p></div>
+            <div class="kart"><h2>Tamamlanan</h2><p id="tamamlanan-sayi">0</p></div>
+        </div>
+
+        <!-- Yeni Cihaz Kayıt Formu -->
+        <section class="form-alani">
+            <h2>Yeni Cihaz Kaydı</h2>
+            <form 
+            <form id="cihaz-formu">
+    <input type="text" id="musteri-adi" placeholder="Firma / Müşteri Adı" required>
+    <input type="text" id="telefon" placeholder="Telefon / İletişim" required>
+    
+    <!-- Geliş Biçimi Seçimi -->
+    <select id="gelis-tipi" onchange="kargoAlanlariniYonet()" required>
+        <option value="Elden">Elden Teslim</option>
+        <option value="Kargo">Kargo ile Geldi</option>
+    </select>
+
+    <!-- Kargo İse Açılacak Gizli Alanlar -->
+    <div id="kargo-detay-alani" style="display: none; grid-column: span 2; display: none; gap: 10px;">
+        <input type="text" id="kargo-firmasi" placeholder="Kargo Firması (Örn: Yurtiçi, Aras)">
+        <input type="text" id="kargo-kodu" placeholder="Kargo Takip / İrsaliye No">
+    </div>
+
+    <select id="cihaz-tipi" required>
+        <option value="">-- Cihaz Tipi Seçin --</option>
+        <option value="Barkod Yazıcı">Barkod Yazıcı</option>
+        <option value="El Terminali">El Terminali</option>
+        <option value="Barkod Okuyucu">Barkod Okuyucu</option>
+        <option value="Tablet / PC">Tablet / PC</option>
+        <option value="Diğer">Diğer</option>
+    </select>
+
+    <input type="text" id="cihaz-model" placeholder="Marka / Model (Örn: Zebra ZD230)" required>
+    <input type="text" id="seri-no" placeholder="Seri No (S/N)" required>
+    <input type="text" id="ariza-detay" placeholder="Arıza / Şikayet Detayı" required>
+
+    <div class="aksesuar-grubu">
+        <label>Yanında Gelenler:</label>
+        <label><input type="checkbox" id="acc-adaptor" value="Adaptör"> Adaptör</label>
+        <label><input type="checkbox" id="acc-kablo" value="Kablo"> Kablo</label>
+        <label><input type="checkbox" id="acc-batarya" value="Batarya"> Batarya</label>
+        <label><input type="checkbox" id="acc-dock" value="Dock"> Dock</label>
+    </div>
+
+    <button type="submit" class="btn-ekle">Cihazı Kaydet</button>
+</form>
+            </form>
+        </section>
+
+        <!-- Yönetici Arama ve Liste Alanı -->
+        <section class="liste-alani">
+            <div class="liste-baslik-arama">
+                <h2>Servisteki Cihazlar</h2>
+                <!-- Barkod Okuyucu Dostu Arama Kutusu -->
+                <input type="text" id="yonetici-arama" onkeyup="yoneticiFiltrele()" placeholder="🔍 Seri No / Barkod Okutun veya Arayın...">
+            </div>
+
+            <table>
+                <thead>
+                    <thead>
+    <tr>
+        <th>Giriş Tarihi</th>
+        <th>Çıkış Tarihi</th>
+        <th>Geliş Tipi</th>
+        <th>Firma / Müşteri</th>
+        <th>Cihaz & Model</th>
+        <th>Seri No (S/N)</th>
+        <th>Aksesuarlar</th>
+        <th>Arıza</th>
+        <th>Durum</th>
+        <th>İşlem</th>
+    </tr>
+</thead>
+                </thead>
+                <tbody id="cihaz-listesi"></tbody>
+            </table>
+        </section>
+    </section>
+</main>
+    </main>
+    <!-- Şifre Onay Penceresi (Modal) -->
+<d<!-- Şifre Onay Penceresi (Modal) -->
+<div id="sifre-modal" class="modal">
+    <div class="modal-icerik">
+        <h2 id="modal-baslik">Sisteme Giriş</h2>
+        <p>Devam etmek için lütfen şifrenizi girin.</p>
+        <input type="password" id="yonetici-sifre-input" placeholder="Şifre">
+        <div class="modal-butonlar">
+            <button onclick="sifreKontrol()" class="btn-giris">Giriş Yap</button>
+            <button onclick="modalKapat()" class="btn-iptal">İptal</button>
+        </div>
+        <p id="sifre-hata" style="color:red; margin-top:10px; display:none;">Hatalı şifre!</p>
+    </div>
+</div>
+        </div>
+        <p id="sifre-hata" style="color:red; margin-top:10px; display:none;">Hatalı şifre!</p>
+    </div>
+</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
