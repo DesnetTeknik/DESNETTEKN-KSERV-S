@@ -88,3 +88,56 @@ function cihazSil(firebaseId) {
         db.collection("cihazlar").doc(firebaseId).delete();
     }
 }
+// Arama ve Filtreleme Fonksiyonu
+function tablodaAra() {
+    const aramaMetni = document.getElementById('tablo-arama').value.toLowerCase();
+    const filtrelenmis = cihazlar.filter(c => 
+        c.musteriAdi.toLowerCase().includes(aramaMetni) ||
+        c.seriNo.toLowerCase().includes(aramaMetni) ||
+        c.marka.toLowerCase().includes(aramaMetni)
+    );
+    listeyiGuncelle(filtrelenmis);
+}
+
+// Tabloyu Ekrana Basma Fonksiyonu
+function listeyiGuncelle(liste) {
+    if (!cihazListesi) return;
+    cihazListesi.innerHTML = '';
+    
+    let bekleyen = 0, islemde = 0, tamamlanan = 0;
+
+    liste.forEach((c) => {
+        if (c.durum === 'Bekliyor') bekleyen++;
+        if (c.durum === 'İşlemde') islemde++;
+        if (c.durum === 'Tamamlandı') tamamlanan++;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${c.girisTarihi || '-'}</td>
+            <td>${c.cikisTarihi || '-'}</td>
+            <td>${c.gelisTipi || 'Elden'}</td>
+            <td><strong>${c.musteriAdi}</strong><br><small>${c.telefon}</small></td>
+            <td>[${c.cihazTipi}] ${c.marka}</td>
+            <td><code>${c.seriNo}</code></td>
+            <td>${c.aksesuarlar || '-'}</td>
+            <td>${c.ariza}</td>
+            <td>
+                <select onchange="durumDegistir('${c.firebaseId}', this.value)">
+                    <option value="Bekliyor" ${c.durum === 'Bekliyor' ? 'selected' : ''}>Bekliyor</option>
+                    <option value="İşlemde" ${c.durum === 'İşlemde' ? 'selected' : ''}>İşlemde</option>
+                    <option value="Tamamlandı" ${c.durum === 'Tamamlandı' ? 'selected' : ''}>Tamamlandı</option>
+                </select>
+            </td>
+            <td>
+                <button onclick="cihazSil('${c.firebaseId}')" style="background:red; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:3px;">Sil</button>
+            </td>
+        `;
+        cihazListesi.appendChild(tr);
+    });
+
+    // Sayaçları Güncelle
+    if (document.getElementById('toplam-sayi')) document.getElementById('toplam-sayi').innerText = liste.length;
+    if (document.getElementById('bekleyen-sayi')) document.getElementById('bekleyen-sayi').innerText = bekleyen;
+    if (document.getElementById('islemde-sayi')) document.getElementById('islemde-sayi').innerText = islemde;
+    if (document.getElementById('tamamlanan-sayi')) document.getElementById('tamamlanan-sayi').innerText = tamamlanan;
+}
