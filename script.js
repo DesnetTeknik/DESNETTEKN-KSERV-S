@@ -29,7 +29,6 @@ function sekmeDegistir(sekmeId) {
     
     document.getElementById(sekmeId).classList.add('active');
     
-    // Tıklanan butona active class'ı ekle
     const butonlar = document.querySelectorAll('.sekme-btn');
     if(sekmeId === 'musteri-paneli') butonlar[0].classList.add('active');
     if(sekmeId === 'yonetici-paneli') butonlar[1].classList.add('active');
@@ -91,7 +90,6 @@ if (cihazFormu) {
     cihazFormu.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // Seçilen Aksesuarları Topla
         const secilenAksesuarlar = [];
         document.querySelectorAll('.aksesuar-cb:checked').forEach(cb => {
             secilenAksesuarlar.push(cb.value);
@@ -130,7 +128,7 @@ function musteriSorgula() {
     const sonucAlani = document.getElementById('musteri-sonuc-alani');
     
     if (!aramaMetni) {
-        sonucAlani.innerHTML = "<p style='color:red;'>Lütfen arama yapmak için Firma Adı veya Seri No giriniz.</p>";
+        sonucAlani.innerHTML = "<p style='color:red; margin-top:15px;'>Lütfen arama yapmak için Firma Adı veya Seri No giriniz.</p>";
         return;
     }
 
@@ -140,7 +138,7 @@ function musteriSorgula() {
     );
 
     if (eslesenler.length === 0) {
-        sonucAlani.innerHTML = "<p>Aradığınız kriterlere uygun cihaz bulunamadı.</p>";
+        sonucAlani.innerHTML = "<p style='margin-top:15px;'>Aradığınız kriterlere uygun cihaz bulunamadı.</p>";
         return;
     }
 
@@ -201,7 +199,8 @@ function listeyiGuncelle(liste) {
                 </select>
             </td>
             <td>
-                <button onclick="cihazSil('${c.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:3px;">Sil</button>
+                <button onclick="etiketYazdir('${c.firebaseId}')" style="background:#0d6efd; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px; margin-right:4px;">Yazdır</button>
+                <button onclick="cihazSil('${c.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px;">Sil</button>
             </td>
         `;
         cihazListesi.appendChild(tr);
@@ -225,4 +224,29 @@ function cihazSil(firebaseId) {
     if (confirm('Bu kaydı bulut veritabanından silmek istediğinize emin misiniz?')) {
         db.collection("cihazlar").doc(firebaseId).delete();
     }
+}
+
+// 11. ETİKET YAZDIRMA FONKSİYONU (TSC RE310 - 50x30 mm)
+function etiketYazdir(firebaseId) {
+    const cihaz = cihazlar.find(c => c.firebaseId === firebaseId);
+    if (!cihaz) return;
+
+    document.getElementById('lbl-musteri').innerText = cihaz.musteriAdi;
+    document.getElementById('lbl-cihaz').innerText = `${cihaz.cihazTipi} ${cihaz.marka}`;
+    document.getElementById('lbl-tarih').innerText = cihaz.girisTarihi || '-';
+    document.getElementById('lbl-serino').innerText = cihaz.seriNo;
+
+    try {
+        JsBarcode("#lbl-barkod", cihaz.seriNo, {
+            format: "CODE128",
+            width: 1.2,
+            height: 30,
+            displayValue: false,
+            margin: 0
+        });
+    } catch (e) {
+        console.log("Barkod üretme hatası:", e);
+    }
+
+    window.print();
 }
