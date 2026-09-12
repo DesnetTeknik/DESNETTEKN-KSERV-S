@@ -227,6 +227,7 @@ function cihazSil(firebaseId) {
 }
 
 // 11. ETİKET YAZDIRMA FONKSİYONU (TSC RE310 - 50x30 mm)
+// ETİKET YAZDIRMA FONKSİYONU (50x30 mm - QR KODLU)
 function etiketYazdir(firebaseId) {
     const cihaz = cihazlar.find(c => c.firebaseId === firebaseId);
     if (!cihaz) return;
@@ -236,17 +237,24 @@ function etiketYazdir(firebaseId) {
     document.getElementById('lbl-tarih').innerText = cihaz.girisTarihi || '-';
     document.getElementById('lbl-serino').innerText = cihaz.seriNo;
 
+    // Önceki QR Kodu Temizle
+    const qrKapsayici = document.getElementById('lbl-qrcode');
+    qrKapsayici.innerHTML = "";
+
+    // Seri Numarası İle QR Kod Üret
     try {
-        JsBarcode("#lbl-barkod", cihaz.seriNo, {
-            format: "CODE128",
-            width: 1.2,
-            height: 30,
-            displayValue: false,
-            margin: 0
+        new QRCode(qrKapsayici, {
+            text: cihaz.seriNo,
+            width: 64,
+            height: 64,
+            correctLevel: QRCode.CorrectLevel.H
         });
     } catch (e) {
-        console.log("Barkod üretme hatası:", e);
+        console.log("QR Kod üretme hatası:", e);
     }
 
-    window.print();
+    // QR Kod Resminin Yüklenmesi İçin Kısa Bir Gecikmeyle Yazdır
+    setTimeout(() => {
+        window.print();
+    }, 200);
 }
