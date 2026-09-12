@@ -12,9 +12,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
-    <!-- Barkod Üretici Kütüphane -->
     <!-- QR Kod Üretici Kütüphane -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -160,13 +159,13 @@
         </section>
     </main>
 
-    <!-- MOBİL YAZICI ETİKET ŞABLONU (50mm x 30mm) -->
+    <!-- MOBİL YAZICI ETİKET ŞABLONU (50mm x 30mm - 2D QR KODLU) -->
     <div id="etiket-alani" class="yazdir-gizli">
         <div class="etiket-icerik">
             <div class="etiket-baslik">DESNET TEKNİK SERVİS</div>
             <div class="etiket-satir"><strong id="lbl-musteri">-</strong></div>
             <div class="etiket-satir"><span id="lbl-cihaz">-</span> | <span id="lbl-tarih">-</span></div>
-            <svg id="lbl-barkod"></svg>
+            <div id="lbl-qrcode"></div>
             <div class="etiket-seri">SN: <span id="lbl-serino">-</span></div>
         </div>
     </div>
