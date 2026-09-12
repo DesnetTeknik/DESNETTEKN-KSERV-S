@@ -811,6 +811,11 @@ tr:hover {
     display: none;
 }
 
+/* ETİKET BASTIRMA STİLLERİ (TSC RE310 - 50mm x 30mm QR KOD) */
+.yazdir-gizli {
+    display: none;
+}
+
 @media print {
     @page {
         size: 50mm 30mm;
@@ -829,12 +834,51 @@ tr:hover {
         top: 0;
         width: 50mm;
         height: 30mm;
-        padding: 1.5mm;
+        padding: 2mm;
         box-sizing: border-box;
         background: white;
         font-family: Arial, sans-serif;
         color: black;
     }
+    .etiket-icerik {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        text-align: center;
+    }
+    .etiket-baslik {
+        font-size: 9pt;
+        font-weight: bold;
+        border-bottom: 1.5px solid black;
+        width: 100%;
+        padding-bottom: 2px;
+    }
+    .etiket-satir {
+        font-size: 8pt;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 46mm;
+    }
+    #lbl-qrcode {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 1mm 0;
+    }
+    #lbl-qrcode img {
+        width: 13mm !important;
+        height: 13mm !important;
+    }
+    .etiket-seri {
+        font-size: 7.5pt;
+        font-weight: bold;
+    }
+}
     .etiket-icerik {
         width: 100%;
         height: 100%;
