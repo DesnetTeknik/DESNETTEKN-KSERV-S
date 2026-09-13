@@ -159,14 +159,19 @@
         </section>
     </main>
 
-    <!-- MOBİL YAZICI ETİKET ŞABLONU (50mm x 30mm - 2D QR KODLU) -->
+    <!-- MOBİL YAZICI ETİKET ŞABLONU (50mm x 30mm - 2 SÜTUNLU YAPI) -->
     <div id="etiket-alani" class="yazdir-gizli">
-        <div class="etiket-icerik">
-            <div class="etiket-baslik">DESNET TEKNİK SERVİS</div>
-            <div class="etiket-satir"><strong id="lbl-musteri">-</strong></div>
-            <div class="etiket-satir"><span id="lbl-cihaz">-</span> | <span id="lbl-tarih">-</span></div>
-            <div id="lbl-qrcode"></div>
-            <div class="etiket-seri">SN: <span id="lbl-serino">-</span></div>
+        <div class="etiket-baslik">DESNET TEKNİK SERVİS</div>
+        <div class="etiket-govde">
+            <div class="etiket-sol">
+                <div class="etiket-satir-sol"><small>MÜŞTERİ:</small><br><strong id="lbl-musteri">-</strong></div>
+                <div class="etiket-satir-sol"><small>CİHAZ:</small><br><span id="lbl-cihaz">-</span></div>
+                <div class="etiket-satir-sol"><small>TARİH:</small> <span id="lbl-tarih">-</span></div>
+            </div>
+            <div class="etiket-sag">
+                <div id="lbl-qrcode"></div>
+                <div class="etiket-seri">SN: <span id="lbl-serino">-</span></div>
+            </div>
         </div>
     </div>
 
