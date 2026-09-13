@@ -226,8 +226,7 @@ function cihazSil(firebaseId) {
     }
 }
 
-// 11. ETİKET YAZDIRMA FONKSİYONU (TSC RE310 - 50x30 mm)
-// ETİKET YAZDIRMA FONKSİYONU (50x30 mm - QR KODLU)
+// 11. ETİKET YAZDIRMA FONKSİYONU (TSC RE310 - 50x30 mm 2D QR KODLU)
 function etiketYazdir(firebaseId) {
     const cihaz = cihazlar.find(c => c.firebaseId === firebaseId);
     if (!cihaz) return;
@@ -245,8 +244,8 @@ function etiketYazdir(firebaseId) {
     try {
         new QRCode(qrKapsayici, {
             text: cihaz.seriNo,
-            width: 64,
-            height: 64,
+            width: 80,
+            height: 80,
             correctLevel: QRCode.CorrectLevel.H
         });
     } catch (e) {
@@ -256,5 +255,5 @@ function etiketYazdir(firebaseId) {
     // QR Kod Resminin Yüklenmesi İçin Kısa Bir Gecikmeyle Yazdır
     setTimeout(() => {
         window.print();
-    }, 200);
+    }, 250);
 }
