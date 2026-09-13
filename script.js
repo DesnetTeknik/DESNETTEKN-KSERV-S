@@ -226,7 +226,7 @@ function cihazSil(firebaseId) {
     }
 }
 
-// 11. ETİKET YAZDIRMA FONKSİYONU (TSC RE310 - 50x30 mm 2D QR KODLU)
+// 11. ETİKET YAZDIRMA FONKSİYONU (TSC RE310 - 2 SÜTUNLU AYRI DÜZEN)
 function etiketYazdir(firebaseId) {
     const cihaz = cihazlar.find(c => c.firebaseId === firebaseId);
     if (!cihaz) return;
@@ -236,23 +236,23 @@ function etiketYazdir(firebaseId) {
     document.getElementById('lbl-tarih').innerText = cihaz.girisTarihi || '-';
     document.getElementById('lbl-serino').innerText = cihaz.seriNo;
 
-    // Önceki QR Kodu Temizle
+    // QR Kod Kapsayıcısını Sıfırla
     const qrKapsayici = document.getElementById('lbl-qrcode');
     qrKapsayici.innerHTML = "";
 
-    // Seri Numarası İle QR Kod Üret
+    // QR Kodu Oluştur
     try {
         new QRCode(qrKapsayici, {
             text: cihaz.seriNo,
-            width: 80,
-            height: 80,
-            correctLevel: QRCode.CorrectLevel.H
+            width: 64,
+            height: 64,
+            correctLevel: QRCode.CorrectLevel.M
         });
     } catch (e) {
-        console.log("QR Kod üretme hatası:", e);
+        console.log("QR Kod hatası:", e);
     }
 
-    // QR Kod Resminin Yüklenmesi İçin Kısa Bir Gecikmeyle Yazdır
+    // QR Kodun Basılması İçin Bekleyip Yazdır
     setTimeout(() => {
         window.print();
     }, 250);
