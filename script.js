@@ -13,19 +13,14 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// SİZİN ÖZEL KULLANICI LİSTENİZ VE YETKİLERİ
-const KULLANICILAR = [
-    { kullaniciAdi: "omer.ekinci", sifre: "omer1221", adSoyad: "Ömer Ekinci", rol: "Patron", yetki: "TAM" },
-    { kullaniciAdi: "muhammed.simsek", sifre: "mami7883", adSoyad: "Muhammed Şimşek", rol: "Teknik Servis Yöneticisi", yetki: "TAM" },
-    { kullaniciAdi: "yigit.turker", sifre: "yigit5678", adSoyad: "Yiğit Türker", rol: "Teknik Eleman", yetki: "EKLEME_YAZDIRMA" },
-    { kullaniciAdi: "emin.muhasebe", sifre: "emin.1244", adSoyad: "Emin", rol: "Muhasebeci", yetki: "IZLEYICI" }
-];
-
-let aktifKullanici = null;
-let cihazlar = [];
+// ŞİFRELER VE ROL YÖNETİMİ
+const PATRON_SIFRESI = "1234";
+const ELEMAN_SIFRESI = "5678";
+let aktifRol = "musteri";
 
 const cihazFormu = document.getElementById('cihaz-formu');
 const cihazListesi = document.getElementById('cihaz-listesi');
+let cihazlar = [];
 
 // 1. SEKME DEĞİŞTİRME FONKSİYONU
 function sekmeDegistir(sekmeId) {
@@ -41,46 +36,32 @@ function sekmeDegistir(sekmeId) {
 
 // 2. SİSTEME GİRİŞ YAPMA FONKSİYONU
 function sistemeGirisYap() {
-    const girilenKullanici = document.getElementById('giris-kullanici').value.trim();
-    const girilenSifre = document.getElementById('giris-sifre').value.trim();
-    
-    const eslesen = KULLANICILAR.find(u => 
-        u.kullaniciAdi.toLowerCase() === girilenKullanici.toLowerCase() && 
-        u.sifre === girilenSifre
-    );
+    const girilenSifre = document.getElementById('giris-sifre').value;
+    const girisEkrani = document.getElementById('giris-ekrani');
+    const panelIcerigi = document.getElementById('panel-icerigi');
+    const rolRozet = document.getElementById('aktif-rol-bilgisi');
 
-    if (eslesen) {
-        aktifKullanici = eslesen;
-        
-        document.getElementById('giris-ekrani').style.display = "none";
-        document.getElementById('panel-icerigi').style.display = "block";
-        
-        document.getElementById('aktif-kullanici-adi').innerText = eslesen.adSoyad;
-        document.getElementById('aktif-rol-bilgisi').innerText = eslesen.rol;
-
-        // Yetkiye göre Arayüz Gizleme/Gösterme
-        const kayitFormAlani = document.getElementById('kayit-form-alani');
-        if (eslesen.yetki === "IZLEYICI") {
-            kayitFormAlani.style.display = "none"; // Muhasebeci yeni kayıt ekleyemez
-        } else {
-            kayitFormAlani.style.display = "block";
-        }
-
-        // Kutuları temizle
-        document.getElementById('giris-kullanici').value = "";
+    if (girilenSifre === PATRON_SIFRESI) {
+        aktifRol = "Patron";
+        girisEkrani.style.display = "none";
+        panelIcerigi.style.display = "block";
+        rolRozet.innerText = "Giriş Yapıldı: PATRON (Tam Yetki)";
         document.getElementById('giris-sifre').value = "";
-
-        // Tabloyu kullanıcının yetkilerine göre yeniden çiz
-        listeyiGuncelle(cihazlar);
+    } else if (girilenSifre === ELEMAN_SIFRESI) {
+        aktifRol = "Eleman";
+        girisEkrani.style.display = "none";
+        panelIcerigi.style.display = "block";
+        rolRozet.innerText = "Giriş Yapıldı: ELEMAN";
+        document.getElementById('giris-sifre').value = "";
     } else {
-        alert("❌ Kullanıcı adı veya şifre hatalı!");
+        alert("❌ Hatalı şifre girdiniz!");
     }
 }
 
 // 3. ÇIKIŞ YAPMA FONKSİYONU
 function cikisYap() {
-    aktifKullanici = null;
-    document.getElementById('giris-ekrani').style.display = "flex";
+    aktifRol = "musteri";
+    document.getElementById('giris-ekrani').style.display = "block";
     document.getElementById('panel-icerigi').style.display = "none";
 }
 
@@ -104,15 +85,10 @@ function kargoAlanlariniYonet() {
     }
 }
 
-// 6. CİHAZ KAYDETME
+// 6. CİHAZ KAYDETME (BULUTA EKLEME)
 if (cihazFormu) {
     cihazFormu.addEventListener('submit', function(e) {
         e.preventDefault();
-
-        if (!aktifKullanici || aktifKullanici.yetki === "IZLEYICI") {
-            alert("❌ Yeni cihaz ekleme yetkiniz yok!");
-            return;
-        }
 
         const secilenAksesuarlar = [];
         document.querySelectorAll('.aksesuar-cb:checked').forEach(cb => {
@@ -137,7 +113,7 @@ if (cihazFormu) {
         };
 
         db.collection("cihazlar").add(yeniCihaz).then(() => {
-            alert('✅ Cihaz kaydı eklendi!');
+            alert('✅ Cihaz kaydı buluta eklendi!');
             cihazFormu.reset();
             kargoAlanlariniYonet();
         }).catch((err) => {
@@ -152,7 +128,7 @@ function musteriSorgula() {
     const sonucAlani = document.getElementById('musteri-sonuc-alani');
     
     if (!aramaMetni) {
-        sonucAlani.innerHTML = "<p style='color:red; margin-top:15px;'>Lütfen Firma Adı veya Seri No giriniz.</p>";
+        sonucAlani.innerHTML = "<p style='color:red; margin-top:15px;'>Lütfen arama yapmak için Firma Adı veya Seri No giriniz.</p>";
         return;
     }
 
@@ -169,11 +145,11 @@ function musteriSorgula() {
     let html = "<div style='margin-top:20px;'>";
     eslesenler.forEach(c => {
         html += `
-            <div style="background:#f4f4f4; padding:15px; margin-bottom:10px; border-radius:5px; border-left:5px solid #0284c7; text-align:left;">
+            <div style="background:#f4f4f4; padding:15px; margin-bottom:10px; border-radius:5px; border-left:5px solid #007bff;">
                 <h3>${c.musteriAdi} - [${c.cihazTipi}] ${c.marka}</h3>
                 <p><strong>Seri No:</strong> ${c.seriNo}</p>
                 <p><strong>Arıza:</strong> ${c.ariza}</p>
-                <p><strong>Durum:</strong> <span style="font-weight:bold; color:#0284c7;">${c.durum}</span></p>
+                <p><strong>Durum:</strong> <span style="font-weight:bold; color:blue;">${c.durum}</span></p>
                 <p><strong>Giriş Tarihi:</strong> ${c.girisTarihi} | <strong>Çıkış Tarihi:</strong> ${c.cikisTarihi}</p>
             </div>
         `;
@@ -193,7 +169,7 @@ function tablodaAra() {
     listeyiGuncelle(filtrelenmis);
 }
 
-// 9. LİSTEYİ VE İSTATİSTİKLERİ GÜNCELLEME (YETKİ KONTROLLÜ)
+// 9. LİSTEYİ VE İSTATİSTİKLERİ GÜNCELLEME
 function listeyiGuncelle(liste) {
     if (!cihazListesi) return;
     cihazListesi.innerHTML = '';
@@ -206,37 +182,6 @@ function listeyiGuncelle(liste) {
         if (c.durum === 'Tamamlandı') tamamlanan++;
 
         const tr = document.createElement('tr');
-
-        // Durum Seçimi (Sadece Patron ve Yöneticide Aktif)
-        let durumHtml = `<span class="rol-rozet">${c.durum}</span>`;
-        if (aktifKullanici && aktifKullanici.yetki === "TAM") {
-            durumHtml = `
-                <select onchange="durumDegistir('${c.firebaseId}', this.value)">
-                    <option value="Bekliyor" ${c.durum === 'Bekliyor' ? 'selected' : ''}>Bekliyor</option>
-                    <option value="İşlemde" ${c.durum === 'İşlemde' ? 'selected' : ''}>İşlemde</option>
-                    <option value="Tamamlandı" ${c.durum === 'Tamamlandı' ? 'selected' : ''}>Tamamlandı</option>
-                </select>
-            `;
-        }
-
-        // İşlem Butonları (Yazdırma ve Silme Yetkisi)
-        let islemButonlari = `<span style="color:#94a3b8; font-size:11px;">Yetki Yok</span>`;
-        if (aktifKullanici) {
-            let butonlar = "";
-            
-            // Yazdırma yetkisi var mı? (Muhasebeci hariç)
-            if (aktifKullanici.yetki === "TAM" || aktifKullanici.yetki === "EKLEME_YAZDIRMA") {
-                butonlar += `<button onclick="etiketYazdir('${c.firebaseId}')" style="background:#0284c7; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px; margin-right:4px;">Yazdır</button>`;
-            }
-
-            // Silme yetkisi var mı? (Sadece TAM yetki)
-            if (aktifKullanici.yetki === "TAM") {
-                butonlar += `<button onclick="cihazSil('${c.firebaseId}')" style="background:#ef4444; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px;">Sil</button>`;
-            }
-
-            if (butonlar !== "") islemButonlari = butonlar;
-        }
-
         tr.innerHTML = `
             <td>${c.girisTarihi || '-'}</td>
             <td>${c.cikisTarihi || '-'}</td>
@@ -246,8 +191,17 @@ function listeyiGuncelle(liste) {
             <td><code>${c.seriNo}</code></td>
             <td>${c.aksesuarlar || '-'}</td>
             <td>${c.ariza}</td>
-            <td>${durumHtml}</td>
-            <td>${islemButonlari}</td>
+            <td>
+                <select onchange="durumDegistir('${c.firebaseId}', this.value)">
+                    <option value="Bekliyor" ${c.durum === 'Bekliyor' ? 'selected' : ''}>Bekliyor</option>
+                    <option value="İşlemde" ${c.durum === 'İşlemde' ? 'selected' : ''}>İşlemde</option>
+                    <option value="Tamamlandı" ${c.durum === 'Tamamlandı' ? 'selected' : ''}>Tamamlandı</option>
+                </select>
+            </td>
+            <td>
+                <button onclick="etiketYazdir('${c.firebaseId}')" style="background:#0d6efd; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px; margin-right:4px;">Yazdır</button>
+                <button onclick="cihazSil('${c.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px;">Sil</button>
+            </td>
         `;
         cihazListesi.appendChild(tr);
     });
@@ -258,12 +212,8 @@ function listeyiGuncelle(liste) {
     if (document.getElementById('tamamlanan-sayi')) document.getElementById('tamamlanan-sayi').innerText = tamamlanan;
 }
 
-// 10. DURUM GÜNCELLEME VE SİLME (GÜVENLİK KONTROLLÜ)
+// 10. DURUM GÜNCELLEME VE SİLME
 function durumDegistir(firebaseId, yeniDurum) {
-    if (!aktifKullanici || aktifKullanici.yetki !== "TAM") {
-        alert("❌ Durum değiştirme yetkiniz yok!");
-        return;
-    }
     db.collection("cihazlar").doc(firebaseId).update({
         durum: yeniDurum,
         cikisTarihi: yeniDurum === 'Tamamlandı' ? new Date().toLocaleDateString('tr-TR') : '-'
@@ -271,16 +221,12 @@ function durumDegistir(firebaseId, yeniDurum) {
 }
 
 function cihazSil(firebaseId) {
-    if (!aktifKullanici || aktifKullanici.yetki !== "TAM") {
-        alert("❌ Cihaz silme yetkiniz yok!");
-        return;
-    }
     if (confirm('Bu kaydı bulut veritabanından silmek istediğinize emin misiniz?')) {
         db.collection("cihazlar").doc(firebaseId).delete();
     }
 }
 
-// 11. ETİKET YAZDIRMA (50mm x 30mm)
+// 11. ETİKET YAZDIRMA FONKSİYONU (TSC RE310 - 2 SÜTUNLU AYRI DÜZEN)
 function etiketYazdir(firebaseId) {
     const cihaz = cihazlar.find(c => c.firebaseId === firebaseId);
     if (!cihaz) return;
@@ -290,20 +236,23 @@ function etiketYazdir(firebaseId) {
     document.getElementById('lbl-tarih').innerText = cihaz.girisTarihi || '-';
     document.getElementById('lbl-serino').innerText = cihaz.seriNo;
 
+    // QR Kod Kapsayıcısını Sıfırla
     const qrKapsayici = document.getElementById('lbl-qrcode');
     qrKapsayici.innerHTML = "";
 
+    // QR Kodu Oluştur
     try {
         new QRCode(qrKapsayici, {
             text: cihaz.seriNo,
-            width: 80,
-            height: 80,
+            width: 64,
+            height: 64,
             correctLevel: QRCode.CorrectLevel.M
         });
     } catch (e) {
         console.log("QR Kod hatası:", e);
     }
 
+    // QR Kodun Basılması İçin Bekleyip Yazdır
     setTimeout(() => {
         window.print();
     }, 250);
