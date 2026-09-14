@@ -17,7 +17,6 @@
         }
 
         body {
-            /* El terminali, barkod yazıcı ve otomasyon temalı yüksek teknolojili koyu arka plan */
             background: linear-gradient(135deg, rgba(10, 15, 30, 0.92), rgba(15, 23, 42, 0.88)), 
                         url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
             background-size: cover;
@@ -39,7 +38,7 @@
             z-index: 100;
         }
 
-        /* Sol Üst Logo Alanı (Büyütüldü) */
+        /* Sol Üst Logo Alanı */
         .logo-container {
             display: flex;
             align-items: center;
@@ -47,7 +46,7 @@
         }
 
         .logo-container img {
-            height: 75px; /* Logo belirgin ve büyük hale getirildi */
+            height: 75px;
             width: auto;
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
@@ -69,7 +68,6 @@
             font-weight: 500;
         }
 
-        /* Kullanıcı Bilgisi Alanı */
         .user-profile {
             display: flex;
             align-items: center;
@@ -89,14 +87,76 @@
             font-weight: 600;
         }
 
-        /* Ana İçerik Konteyneri */
         .container {
             max-width: 1200px;
             margin: 30px auto;
             padding: 0 20px;
         }
 
-        /* Kart Yapıları */
+        /* Giriş Paneli Stili */
+        .login-box {
+            max-width: 420px;
+            margin: 60px auto;
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .login-box h2 {
+            margin-bottom: 24px;
+            color: #38bdf8;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus {
+            border-color: #38bdf8;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-login:hover {
+            background: #0369a1;
+        }
+
+        /* Kart Yapısı ve Tablo */
         .card {
             background: rgba(30, 41, 59, 0.75);
             backdrop-filter: blur(16px);
@@ -141,10 +201,6 @@
             font-size: 0.9rem;
         }
 
-        tr:hover {
-            background: rgba(255, 255, 255, 0.03);
-        }
-
         .status-badge {
             padding: 4px 10px;
             border-radius: 20px;
@@ -155,14 +211,8 @@
         .status-processing { background: rgba(234, 179, 8, 0.2); color: #fde047; }
         .status-completed { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
 
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .logo-text {
-                display: none;
-            }
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -170,7 +220,6 @@
 
     <!-- Üst Header Barı -->
     <header>
-        <!-- Sol Üst Büyütülmüş Logo -->
         <div class="logo-container">
             <img src="Gemini_Generated_Image_5vou275vou275vou.jpg" alt="Desnet Barkod Teknolojileri Logo">
             <div class="logo-text">
@@ -179,17 +228,31 @@
             </div>
         </div>
 
-        <!-- Sağ Üst Kullanıcı Paneli -->
-        <div class="user-profile">
+        <div class="user-profile id="userPanel" class="hidden">
             <i class="fa-solid fa-user-gear" style="color: #38bdf8;"></i>
             <span id="userName">Muhammed Şimşek</span>
             <span class="role-badge" id="userRole">Müdür / Yönetici</span>
         </div>
     </header>
 
-    <!-- Ana Panel İçeriği -->
-    <div class="container">
-        
+    <!-- Giriş Paneli -->
+    <div id="loginSection" class="login-box">
+        <h2><i class="fa-solid fa-lock"></i> Sistemi Girişi</h2>
+        <form id="loginForm" onsubmit="event.preventDefault(); showDashboard();">
+            <div class="form-group">
+                <label>Kullanıcı Adı</label>
+                <input type="text" id="usernameInput" placeholder="Kullanıcı adınızı girin" required>
+            </div>
+            <div class="form-group">
+                <label>Şifre</label>
+                <input type="password" id="passwordInput" placeholder="Şifrenizi girin" required>
+            </div>
+            <button type="submit" class="btn-login">Giriş Yap</button>
+        </form>
+    </div>
+
+    <!-- Ana Panel İçeriği (Giriş yapınca açılır) -->
+    <div id="dashboardSection" class="container hidden">
         <div class="card">
             <div class="card-header">
                 <i class="fa-solid fa-barcode"></i> Servisteki Cihaz Durumları
@@ -228,10 +291,14 @@
                 </table>
             </div>
         </div>
-
     </div>
 
-    <!-- Script Bağlantıları -->
+    <script>
+        function showDashboard() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+        }
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
