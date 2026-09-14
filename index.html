@@ -29,7 +29,7 @@
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 10px 24px;
+            padding: 12px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -38,7 +38,7 @@
             z-index: 100;
         }
 
-        /* Sol Üst Logo Alanı */
+        /* Sol Üst Büyük Logo Alanı */
         .logo-container {
             display: flex;
             align-items: center;
@@ -46,15 +46,15 @@
         }
 
         .logo-container img {
-            height: 75px;
+            height: 90px; /* Logo dev boyuta getirildi */
             width: auto;
             border-radius: 8px;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
             object-fit: contain;
         }
 
         .logo-text {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 700;
             letter-spacing: 0.5px;
             color: #ffffff;
@@ -63,7 +63,7 @@
         }
 
         .logo-text span {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: #38bdf8;
             font-weight: 500;
         }
@@ -96,8 +96,8 @@
         /* Giriş Paneli Stili */
         .login-box {
             max-width: 420px;
-            margin: 60px auto;
-            background: rgba(30, 41, 59, 0.85);
+            margin: 80px auto;
+            background: rgba(30, 41, 59, 0.88);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
@@ -156,7 +156,7 @@
             background: #0369a1;
         }
 
-        /* Kart Yapısı ve Tablo */
+        /* Tablo Stilleri */
         .card {
             background: rgba(30, 41, 59, 0.75);
             backdrop-filter: blur(16px);
@@ -211,6 +211,7 @@
         .status-processing { background: rgba(234, 179, 8, 0.2); color: #fde047; }
         .status-completed { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
 
+        /* Gizleme Sınıfı */
         .hidden {
             display: none !important;
         }
@@ -228,7 +229,7 @@
             </div>
         </div>
 
-        <div class="user-profile id="userPanel" class="hidden">
+        <div id="userPanel" class="user-profile hidden">
             <i class="fa-solid fa-user-gear" style="color: #38bdf8;"></i>
             <span id="userName">Muhammed Şimşek</span>
             <span class="role-badge" id="userRole">Müdür / Yönetici</span>
@@ -237,8 +238,8 @@
 
     <!-- Giriş Paneli -->
     <div id="loginSection" class="login-box">
-        <h2><i class="fa-solid fa-lock"></i> Sistemi Girişi</h2>
-        <form id="loginForm" onsubmit="event.preventDefault(); showDashboard();">
+        <h2><i class="fa-solid fa-lock"></i> Sistem Girişi</h2>
+        <form id="loginForm" onsubmit="loginUser(event)">
             <div class="form-group">
                 <label>Kullanıcı Adı</label>
                 <input type="text" id="usernameInput" placeholder="Kullanıcı adınızı girin" required>
@@ -251,7 +252,7 @@
         </form>
     </div>
 
-    <!-- Ana Panel İçeriği (Giriş yapınca açılır) -->
+    <!-- Ana Panel İçeriği (Girişte açılır) -->
     <div id="dashboardSection" class="container hidden">
         <div class="card">
             <div class="card-header">
@@ -294,9 +295,11 @@
     </div>
 
     <script>
-        function showDashboard() {
+        function loginUser(e) {
+            e.preventDefault();
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('userPanel').classList.remove('hidden');
         }
     </script>
     <script src="script.js"></script>
