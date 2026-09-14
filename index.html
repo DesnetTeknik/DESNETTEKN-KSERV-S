@@ -24,7 +24,7 @@
             min-height: 100vh;
         }
 
-        /* Üst Header Barı */
+        /* Header Barı */
         header {
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(12px);
@@ -38,7 +38,7 @@
             z-index: 100;
         }
 
-        /* Sol Üst Büyük Logo Alanı */
+        /* Sol Üst Büyük Logo */
         .logo-container {
             display: flex;
             align-items: center;
@@ -46,7 +46,7 @@
         }
 
         .logo-container img {
-            height: 90px; /* Logo dev boyuta getirildi */
+            height: 85px;
             width: auto;
             border-radius: 8px;
             box-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
@@ -56,7 +56,6 @@
         .logo-text {
             font-size: 1.4rem;
             font-weight: 700;
-            letter-spacing: 0.5px;
             color: #ffffff;
             display: flex;
             flex-direction: column;
@@ -93,7 +92,7 @@
             padding: 0 20px;
         }
 
-        /* Giriş Paneli Stili */
+        /* Giriş Kutusu */
         .login-box {
             max-width: 420px;
             margin: 80px auto;
@@ -112,34 +111,42 @@
             font-size: 1.5rem;
         }
 
-        .form-group {
+        /* Form Elemanları */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
             margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
             text-align: left;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-size: 0.85rem;
             color: #94a3b8;
         }
 
-        .form-group input {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.15);
             background: rgba(15, 23, 42, 0.6);
             color: white;
             outline: none;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             border-color: #38bdf8;
         }
 
-        .btn-login {
+        .btn-primary {
             width: 100%;
             padding: 12px;
             background: #0284c7;
@@ -147,16 +154,16 @@
             border: none;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: background 0.2s;
         }
 
-        .btn-login:hover {
+        .btn-primary:hover {
             background: #0369a1;
         }
 
-        /* Tablo Stilleri */
+        /* Kart Yapıları */
         .card {
             background: rgba(30, 41, 59, 0.75);
             backdrop-filter: blur(16px);
@@ -168,7 +175,7 @@
         }
 
         .card-header {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 20px;
             color: #38bdf8;
@@ -177,6 +184,7 @@
             gap: 10px;
         }
 
+        /* Tablo Stilleri */
         .table-responsive {
             overflow-x: auto;
         }
@@ -211,7 +219,6 @@
         .status-processing { background: rgba(234, 179, 8, 0.2); color: #fde047; }
         .status-completed { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
 
-        /* Gizleme Sınıfı */
         .hidden {
             display: none !important;
         }
@@ -222,7 +229,7 @@
     <!-- Üst Header Barı -->
     <header>
         <div class="logo-container">
-            <img src="Gemini_Generated_Image_5vou275vou275vou.jpg" alt="Desnet Barkod Teknolojileri Logo">
+            <img src="Gemini_Generated_Image_5vou275vou275vou.jpg" alt="Desnet Logo">
             <div class="logo-text">
                 DESNET
                 <span>Teknik Servis Portalı</span>
@@ -248,12 +255,52 @@
                 <label>Şifre</label>
                 <input type="password" id="passwordInput" placeholder="Şifrenizi girin" required>
             </div>
-            <button type="submit" class="btn-login">Giriş Yap</button>
+            <button type="submit" class="btn-primary">Giriş Yap</button>
         </form>
     </div>
 
-    <!-- Ana Panel İçeriği (Girişte açılır) -->
+    <!-- Ana Panel İçeriği -->
     <div id="dashboardSection" class="container hidden">
+        
+        <!-- YENİ SERVİS KAYIT FORMU -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fa-solid fa-plus-circle"></i> Yeni Servis Kaydı Ekle
+            </div>
+            <form id="addServiceForm" onsubmit="addService(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Müşteri / Firma Adı</label>
+                        <input type="text" id="clientName" placeholder="Örn: ABC Lojistik" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cihaz Modeli</label>
+                        <input type="text" id="deviceModel" placeholder="Örn: Zebra ZD230d" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Seri Numarası</label>
+                        <input type="text" id="serialNo" placeholder="Örn: 21349082" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Servis Durumu</label>
+                        <select id="serviceStatus">
+                            <option value="İşlemde">İşlemde</option>
+                            <option value="Beklemede">Parça Bekliyor</option>
+                            <option value="Tamamlandı">Tamamlandı</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Arıza / İşlem Detayı</label>
+                    <textarea id="issueDetail" rows="2" placeholder="Cihazdaki arıza veya yapılan işlemi yazın..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary" style="width: auto; padding: 10px 24px;">
+                    <i class="fa-solid fa-save"></i> Cihazı Kaydet
+                </button>
+            </form>
+        </div>
+
+        <!-- SERVİSTEKİ CİHAZLAR TABLOSU -->
         <div class="card">
             <div class="card-header">
                 <i class="fa-solid fa-barcode"></i> Servisteki Cihaz Durumları
@@ -271,7 +318,7 @@
                             <th>İşlem</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="deviceTableBody">
                         <tr>
                             <td>#SRV-1024</td>
                             <td>ABC Lojistik</td>
@@ -292,6 +339,7 @@
                 </table>
             </div>
         </div>
+
     </div>
 
     <script>
@@ -300,6 +348,31 @@
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('dashboardSection').classList.remove('hidden');
             document.getElementById('userPanel').classList.remove('hidden');
+        }
+
+        function addService(e) {
+            e.preventDefault();
+            const client = document.getElementById('clientName').value;
+            const model = document.getElementById('deviceModel').value;
+            const serial = document.getElementById('serialNo').value;
+            const status = document.getElementById('serviceStatus').value;
+
+            const srvNo = '#SRV-' + Math.floor(1000 + Math.random() * 9000);
+            const badgeClass = status === 'Tamamlandı' ? 'status-completed' : 'status-processing';
+
+            const newRow = `
+                <tr>
+                    <td>${srvNo}</td>
+                    <td>${client}</td>
+                    <td>${model}</td>
+                    <td>${serial}</td>
+                    <td><span class="status-badge ${badgeClass}">${status}</span></td>
+                    <td><i class="fa-solid fa-pen-to-square" style="cursor:pointer; color:#38bdf8;"></i></td>
+                </tr>
+            `;
+
+            document.getElementById('deviceTableBody').insertAdjacentHTML('afterbegin', newRow);
+            document.getElementById('addServiceForm').reset();
         }
     </script>
     <script src="script.js"></script>
