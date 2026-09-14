@@ -3,200 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desnet Teknik Servis Takip Sistemi</title>
+    <title>DESNET - Teknik Servis Takip Sistemi</title>
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS Stil Dosyası -->
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
 
-    <!-- Firebase Kütüphaneleri -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    
-    <!-- QR Kod Üretici Kütüphane -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+        body {
+            /* El terminali, barkod yazıcı ve otomasyon temalı yüksek teknolojili koyu arka plan */
+            background: linear-gradient(135deg, rgba(10, 15, 30, 0.92), rgba(15, 23, 42, 0.88)), 
+                        url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        /* Üst Header Barı */
+        header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        /* Sol Üst Logo Alanı */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-container img {
+            height: 48px;
+            width: auto;
+            border-radius: 6px;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+            object-fit: contain;
+        }
+
+        .logo-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-text span {
+            font-size: 0.75rem;
+            color: #38bdf8;
+            font-weight: 500;
+        }
+
+        /* Kullanıcı Bilgisi Alanı */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile .role-badge {
+            background: #0284c7;
+            color: white;
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        /* Ana İçerik Konteyneri */
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Kart Yapıları */
+        .card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-processing { background: rgba(234, 179, 8, 0.2); color: #fde047; }
+        .status-completed { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .logo-text {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
 
+    <!-- Üst Header Barı -->
     <header>
-        <div class="logo-alan">
-            <span class="logo-baslik">DESNET</span>
-            <span class="logo-alt">Teknik Servis Takip</span>
+        <!-- Sol Üst Logo (Yüklediğiniz dosya adı ayarlandı) -->
+        <div class="logo-container">
+            <img src="Gemini_Generated_Image_5vou275vou275vou.jpg" alt="Desnet Barkod Teknolojileri Logo">
+            <div class="logo-text">
+                DESNET
+                <span>Teknik Servis Portalı</span>
+            </div>
         </div>
-        <nav>
-            <button class="sekme-btn active" onclick="sekmeDegistir('musteri-paneli')">Müşteri Sorgulama</button>
-            <button class="sekme-btn" onclick="sekmeDegistir('yonetici-paneli')">Sistem Girişi</button>
-        </nav>
+
+        <!-- Sağ Üst Kullanıcı Paneli -->
+        <div class="user-profile">
+            <i class="fa-solid fa-user-gear" style="color: #38bdf8;"></i>
+            <span id="userName">Muhammed Şimşek</span>
+            <span class="role-badge" id="userRole">Müdür / Yönetici</span>
+        </div>
     </header>
 
-    <main>
-        <!-- MÜŞTERİ SORGULAMA PANELİ -->
-        <section id="musteri-paneli" class="sekme-icerik active">
-            <div class="sorgu-kutusu">
-                <h2>Cihaz Durumu Sorgulama</h2>
-                <p>Cihazınızın güncel durumunu öğrenmek için Firma Adı veya Seri No (S/N) giriniz.</p>
-                <div class="arama-formu">
-                    <input type="text" id="musteri-sorgu-input" placeholder="Örn: Desnet veya S/N: 12345">
-                    <button class="btn-sorgula" onclick="musteriSorgula()">Sorgula</button>
-                </div>
-                <div id="musteri-sonuc-alani"></div>
+    <!-- Ana Panel İçeriği -->
+    <div class="container">
+        
+        <div class="card">
+            <div class="card-header">
+                <i class="fa-solid fa-barcode"></i> Servisteki Cihaz Durumları
             </div>
-        </section>
-
-        <!-- YÖNETİCİ PANELİ -->
-        <section id="yonetici-paneli" class="sekme-icerik">
             
-            <!-- Modern Giriş Ekranı -->
-            <div id="giris-ekrani" class="giris-kart-kapsayici">
-                <div class="giris-kart">
-                    <div class="giris-icon">🔒</div>
-                    <h2>Sistem Girişi</h2>
-                    <p>Devam etmek için kullanıcı adı ve şifrenizi giriniz.</p>
-                    
-                    <div class="giris-form-grup">
-                        <label for="giris-kullanici">Kullanıcı Adı</label>
-                        <input type="text" id="giris-kullanici" placeholder="örn: muhammed.simsek" autocomplete="off">
-                    </div>
-                    
-                    <div class="giris-form-grup">
-                        <label for="giris-sifre">Şifre</label>
-                        <input type="password" id="giris-sifre" placeholder="••••••••">
-                    </div>
-
-                    <button class="btn-giris-yap" onclick="sistemeGirisYap()">Giriş Yap</button>
-                </div>
-            </div>
-
-            <!-- Panel İçeriği (Giriş Yapılınca Açılır) -->
-            <div id="panel-icerigi" style="display: none;">
-                <div class="panel-header">
-                    <div class="kullanici-rozet-kapsayici">
-                        <span class="kullanici-avatar">👤</span>
-                        <div>
-                            <div id="aktif-kullanici-adi" class="kullanici-isim">Kullanıcı</div>
-                            <span id="aktif-rol-bilgisi" class="rol-rozet">Yetki Seviyesi</span>
-                        </div>
-                    </div>
-                    <button class="btn-cikis" onclick="cikisYap()">Çıkış Yap 🚪</button>
-                </div>
-
-                <!-- İstatistik Kartları -->
-                <div class="istatistik-kapsayici">
-                    <div class="kart kart-toplam">
-                        <h3>Toplam Cihaz</h3>
-                        <p id="toplam-sayi">0</p>
-                    </div>
-                    <div class="kart kart-bekleyen">
-                        <h3>Bekleyen</h3>
-                        <p id="bekleyen-sayi">0</p>
-                    </div>
-                    <div class="kart kart-islemde">
-                        <h3>İşlemde</h3>
-                        <p id="islemde-sayi">0</p>
-                    </div>
-                    <div class="kart kart-tamamlanan">
-                        <h3>Tamamlanan</h3>
-                        <p id="tamamlanan-sayi">0</p>
-                    </div>
-                </div>
-
-                <!-- Yeni Cihaz Kayıt Formu (Muhasebeciye Gizlenir) -->
-                <div id="kayit-form-alani" class="form-kapsayici">
-                    <h2>Yeni Cihaz Kaydı</h2>
-                    <form id="cihaz-formu" style="margin-top: 15px;">
-                        <div class="form-satir">
-                            <input type="text" id="musteri-adi" placeholder="Firma / Müşteri Adı" required>
-                            <input type="text" id="telefon" placeholder="Telefon / İletişim" required>
-                            <select id="gelis-tipi" onchange="kargoAlanlariniYonet()">
-                                <option value="Elden Teslim">Elden Teslim</option>
-                                <option value="Kargo">Kargo</option>
-                            </select>
-                        </div>
-
-                        <div id="kargo-detay-alani" class="form-satir" style="display: none;">
-                            <input type="text" id="kargo-firmasi" placeholder="Kargo Firması">
-                            <input type="text" id="kargo-kodu" placeholder="Kargo Takip / Gönderi Kodu">
-                        </div>
-
-                        <div class="form-satir">
-                            <select id="cihaz-tipi" required>
-                                <option value="">-- Cihaz Tipi Seçin --</option>
-                                <option value="El Terminali">El Terminali</option>
-                                <option value="Barkod Okuyucu">Barkod Okuyucu</option>
-                                <option value="Barkod Yazıcı">Barkod Yazıcı</option>
-                                <option value="Tablet / PC">Tablet / PC</option>
-                                <option value="Diğer">Diğer</option>
-                            </select>
-                            <input type="text" id="marka" placeholder="Marka / Model (Örn: Zebra TC21, TSC RE310)" required>
-                            <input type="text" id="seri-no" placeholder="Seri No (S/N)" required>
-                        </div>
-
-                        <div class="form-satir">
-                            <input type="text" id="ariza" placeholder="Arıza / Şikayet Detayı" required>
-                        </div>
-
-                        <div class="form-satir aksesuar-alani">
-                            <strong>Yanında Gelenler:</strong>
-                            <label><input type="checkbox" class="aksesuar-cb" value="Adaptör"> Adaptör</label>
-                            <label><input type="checkbox" class="aksesuar-cb" value="Kablo"> Kablo</label>
-                            <label><input type="checkbox" class="aksesuar-cb" value="Batarya"> Batarya</label>
-                            <label><input type="checkbox" class="aksesuar-cb" value="Dock"> Dock</label>
-                        </div>
-
-                        <button type="submit" class="btn-kaydet" style="margin-top: 15px;">Cihazı Kaydet</button>
-                    </form>
-                </div>
-
-                <!-- Cihaz Listesi Tablosu -->
-                <div class="liste-kapsayici">
-                    <div class="panel-header">
-                        <h2>Servisteki Cihazlar</h2>
-                        <input type="text" id="tablo-arama" onkeyup="tablodaAra()" placeholder="🔍 Seri No / Firma Ara..." style="padding: 8px 12px; border: 1px solid #ced4da; border-radius: 5px; width: 250px;">
-                    </div>
-                    
-                    <div class="tablo-sarmal">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Giriş Tarihi</th>
-                                    <th>Çıkış Tarihi</th>
-                                    <th>Geliş Tipi</th>
-                                    <th>Firma / Müşteri</th>
-                                    <th>Cihaz & Model</th>
-                                    <th>Seri No (S/N)</th>
-                                    <th>Aksesuarlar</th>
-                                    <th>Arıza</th>
-                                    <th>Durum</th>
-                                    <th>İşlem</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cihaz-listesi">
-                                <!-- JS Dinamik Dolduracak -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-    </main>
-
-    <!-- MOBİL YAZICI ETİKET ŞABLONU (50mm x 30mm) -->
-    <div id="etiket-alani" class="yazdir-gizli">
-        <div class="etiket-baslik">DESNET TEKNİK SERVİS</div>
-        <div class="etiket-govde">
-            <div class="etiket-sol">
-                <div class="etiket-satir-sol"><small>MÜŞTERİ:</small><br><strong id="lbl-musteri">-</strong></div>
-                <div class="etiket-satir-sol"><small>CİHAZ:</small><br><span id="lbl-cihaz">-</span></div>
-                <div class="etiket-satir-sol"><small>TARİH:</small> <span id="lbl-tarih">-</span></div>
-            </div>
-            <div class="etiket-sag">
-                <div id="lbl-qrcode"></div>
-                <div class="etiket-seri">SN: <span id="lbl-serino">-</span></div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Servis No</th>
+                            <th>Müşteri</th>
+                            <th>Cihaz Modeli</th>
+                            <th>Seri No</th>
+                            <th>Durum</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#SRV-1024</td>
+                            <td>ABC Lojistik</td>
+                            <td>Zebra ZD230d Barkod Yazıcı</td>
+                            <td>21349082</td>
+                            <td><span class="status-badge status-processing">İşlemde</span></td>
+                            <td><i class="fa-solid fa-pen-to-square" style="cursor:pointer; color:#38bdf8;"></i></td>
+                        </tr>
+                        <tr>
+                            <td>#SRV-1025</td>
+                            <td>Sürat Market</td>
+                            <td>Honeywell CT40 El Terminali</td>
+                            <td>89230192</td>
+                            <td><span class="status-badge status-completed">Tamamlandı</span></td>
+                            <td><i class="fa-solid fa-pen-to-square" style="cursor:pointer; color:#38bdf8;"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
+
     </div>
 
-    <!-- JS Dosyası -->
-    <script src="script.js"></script>
 </body>
 </html>
