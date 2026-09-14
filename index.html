@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teknik Servis Takip Sistemi</title>
+    <title>Desnet Teknik Servis Takip Sistemi</title>
     
     <!-- CSS Stil Dosyası -->
     <link rel="stylesheet" href="style.css">
@@ -18,10 +18,13 @@
 <body>
 
     <header>
-        <h1>Teknik Servis Takip Sistemi</h1>
+        <div class="logo-alan">
+            <span class="logo-baslik">DESNET</span>
+            <span class="logo-alt">Teknik Servis Takip</span>
+        </div>
         <nav>
             <button class="sekme-btn active" onclick="sekmeDegistir('musteri-paneli')">Müşteri Sorgulama</button>
-            <button class="sekme-btn" onclick="sekmeDegistir('yonetici-paneli')">Yönetici Paneli</button>
+            <button class="sekme-btn" onclick="sekmeDegistir('yonetici-paneli')">Sistem Girişi</button>
         </nav>
     </header>
 
@@ -30,7 +33,7 @@
         <section id="musteri-paneli" class="sekme-icerik active">
             <div class="sorgu-kutusu">
                 <h2>Cihaz Durumu Sorgulama</h2>
-                <p>Cihazınızın durumunu öğrenmek için Firma Adı veya Seri No (S/N) giriniz.</p>
+                <p>Cihazınızın güncel durumunu öğrenmek için Firma Adı veya Seri No (S/N) giriniz.</p>
                 <div class="arama-formu">
                     <input type="text" id="musteri-sorgu-input" placeholder="Örn: Desnet veya S/N: 12345">
                     <button class="btn-sorgula" onclick="musteriSorgula()">Sorgula</button>
@@ -42,20 +45,38 @@
         <!-- YÖNETİCİ PANELİ -->
         <section id="yonetici-paneli" class="sekme-icerik">
             
-            <!-- Giriş Ekranı -->
-            <div id="giris-ekrani" class="sorgu-kutusu">
-                <h2>Yönetici Girişi</h2>
-                <div class="arama-formu" style="margin-top: 15px;">
-                    <input type="password" id="giris-sifre" placeholder="Giriş Şifreniz">
-                    <button class="btn-sorgula" onclick="sistemeGirisYap()">Giriş Yap</button>
+            <!-- Modern Giriş Ekranı -->
+            <div id="giris-ekrani" class="giris-kart-kapsayici">
+                <div class="giris-kart">
+                    <div class="giris-icon">🔒</div>
+                    <h2>Sistem Girişi</h2>
+                    <p>Devam etmek için kullanıcı adı ve şifrenizi giriniz.</p>
+                    
+                    <div class="giris-form-grup">
+                        <label for="giris-kullanici">Kullanıcı Adı</label>
+                        <input type="text" id="giris-kullanici" placeholder="örn: muhammed.simsek" autocomplete="off">
+                    </div>
+                    
+                    <div class="giris-form-grup">
+                        <label for="giris-sifre">Şifre</label>
+                        <input type="password" id="giris-sifre" placeholder="••••••••">
+                    </div>
+
+                    <button class="btn-giris-yap" onclick="sistemeGirisYap()">Giriş Yap</button>
                 </div>
             </div>
 
             <!-- Panel İçeriği (Giriş Yapılınca Açılır) -->
             <div id="panel-icerigi" style="display: none;">
                 <div class="panel-header">
-                    <span id="aktif-rol-bilgisi" class="rol-rozet">Giriş Yapıldı</span>
-                    <button class="btn-cikis" onclick="cikisYap()">Çıkış Yap</button>
+                    <div class="kullanici-rozet-kapsayici">
+                        <span class="kullanici-avatar">👤</span>
+                        <div>
+                            <div id="aktif-kullanici-adi" class="kullanici-isim">Kullanıcı</div>
+                            <span id="aktif-rol-bilgisi" class="rol-rozet">Yetki Seviyesi</span>
+                        </div>
+                    </div>
+                    <button class="btn-cikis" onclick="cikisYap()">Çıkış Yap 🚪</button>
                 </div>
 
                 <!-- İstatistik Kartları -->
@@ -78,8 +99,8 @@
                     </div>
                 </div>
 
-                <!-- Yeni Cihaz Kayıt Formu -->
-                <div class="form-kapsayici">
+                <!-- Yeni Cihaz Kayıt Formu (Muhasebeciye Gizlenir) -->
+                <div id="kayit-form-alani" class="form-kapsayici">
                     <h2>Yeni Cihaz Kaydı</h2>
                     <form id="cihaz-formu" style="margin-top: 15px;">
                         <div class="form-satir">
@@ -129,7 +150,7 @@
                 <div class="liste-kapsayici">
                     <div class="panel-header">
                         <h2>Servisteki Cihazlar</h2>
-                        <input type="text" id="tablo-arama" onkeyup="tablodaAra()" placeholder="🔍 Seri No / Barkod Okut..." style="padding: 8px 12px; border: 1px solid #ced4da; border-radius: 5px;">
+                        <input type="text" id="tablo-arama" onkeyup="tablodaAra()" placeholder="🔍 Seri No / Firma Ara..." style="padding: 8px 12px; border: 1px solid #ced4da; border-radius: 5px; width: 250px;">
                     </div>
                     
                     <div class="tablo-sarmal">
@@ -159,7 +180,7 @@
         </section>
     </main>
 
-    <!-- MOBİL YAZICI ETİKET ŞABLONU (50mm x 30mm - 2 SÜTUNLU YAPI) -->
+    <!-- MOBİL YAZICI ETİKET ŞABLONU (50mm x 30mm) -->
     <div id="etiket-alani" class="yazdir-gizli">
         <div class="etiket-baslik">DESNET TEKNİK SERVİS</div>
         <div class="etiket-govde">
