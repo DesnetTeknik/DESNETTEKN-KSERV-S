@@ -1,6 +1,6 @@
 // FIREBASE BULUT YAPILANDIRMASI
 const firebaseConfig = {
-    apiKey: "AIzaSyCjVuS94dkxNLPfp04Eqgty0sj7Xo0qc6s",
+    apiKey: "1:200503339006:web:0e940ae8a383a802a042af",
     authDomain: "desnetteknik-66527.firebaseapp.com",
     projectId: "desnetteknik-66527",
     storageBucket: "desnetteknik-66527.firebasestorage.app",
