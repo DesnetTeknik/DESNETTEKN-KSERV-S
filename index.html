@@ -5,24 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teknik Servis Takip Sistemi</title>
     
-    <!-- CSS Dosyası -->
+    <!-- CSS -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- Firebase SDK (v9 Compat) -->
+    <!-- Firebase Kütüphaneleri -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-    <!-- ÜST MENÜ (NAVBAR) -->
+    <!-- ÜST MENÜ -->
     <header class="navbar">
         <div class="logo">
             <h2>Teknik Servis Takip Sistemi</h2>
         </div>
         <nav>
-            <button class="nav-btn active" onclick="sayfaDegistir('sorgulama')">Müşteri Sorgulama</button>
-            <button class="nav-btn" onclick="sayfaDegistir('panel')">Yönetici Paneli</button>
+            <button class="nav-btn active" id="btn-sorgula-sekme">Müşteri Sorgulama</button>
+            <button class="nav-btn" id="btn-panel-sekme">Yönetici Paneli</button>
         </nav>
     </header>
 
@@ -39,7 +39,7 @@
                 <input type="text" id="sorgu-sn" placeholder="Seri No (SN)">
             </div>
             
-            <button class="btn-primary" onclick="cihazSorgula()">Sorgula</button>
+            <button class="btn-primary" id="btn-sorgula-islem">Sorgula</button>
 
             <!-- SORGULAMA SONUCU -->
             <div id="sorgu-sonuc" class="sonuc-kutu" style="display: none;">
@@ -54,7 +54,7 @@
     </section>
 
     <!-- SAYFA 2: YÖNETİCİ PANELİ -->
-    <section id="panel-sayfasi" class="sayfa-alani">
+    <section id="panel-sayfasi" class="sayfa-alani" style="display: none;">
         
         <!-- YÖNETİCİ GİRİŞ EKRANI -->
         <div id="giris-ekrani" class="giris-kutu">
@@ -65,7 +65,7 @@
             <div class="form-grup">
                 <input type="password" id="giris-sifre" placeholder="Şifre">
             </div>
-            <button class="btn-primary" onclick="sistemeGirisYap()">Giriş Yap</button>
+            <button class="btn-primary" id="btn-giris-yap">Giriş Yap</button>
         </div>
 
         <!-- YÖNETİCİ PANEL İÇERİĞİ -->
@@ -74,14 +74,14 @@
                 <h2>Servis Kayıt Yönetimi</h2>
                 <div class="kullanici-bilgi">
                     <span id="aktif-rol-bilgisi" class="rol-rozet">Giriş Yapıldı</span>
-                    <button class="btn-danger" onclick="sistemdenCikisYap()">Çıkış Yap</button>
+                    <button class="btn-danger" id="btn-cikis-yap">Çıkış Yap</button>
                 </div>
             </div>
 
             <!-- YENİ SERVİS KAYIT FORMU -->
             <div class="kayit-form-kutu">
                 <h3>Yeni Servis Kaydı Oluştur</h3>
-                <form id="yeni-kayit-formu" onsubmit="yeniKayitEkle(event)">
+                <form id="yeni-kayit-formu">
                     <div class="form-row">
                         <input type="text" id="kayit-musteri" placeholder="Müşteri Adı / Firma" required>
                         <input type="text" id="kayit-cihaz" placeholder="Cihaz Adı / Model" required>
@@ -93,7 +93,7 @@
                             <option value="Onarımda">Onarımda</option>
                             <option value="Parça Bekliyor">Parça Bekliyor</option>
                             <option value="Tamamlandı">Tamamlandı</option>
-                            <option value="Iptal Edildi">İptal Edildi</option>
+                            <option value="İptal Edildi">İptal Edildi</option>
                         </select>
                         <input type="text" id="kayit-aciklama" placeholder="Servis Açıklaması / Arıza Detayı">
                     </div>
@@ -117,14 +117,14 @@
                         </tr>
                     </thead>
                     <tbody id="servis-listesi-body">
-                        <!-- JavaScript ile dinamik dolacak -->
+                        <!-- JS ile dolacak -->
                     </tbody>
                 </table>
             </div>
         </div>
     </section>
 
-    <!-- JS Dosyası (Sürüm v=3 ile önbellek kırıldı) -->
-    <script src="script.js?v=3"></script>
+    <!-- JS DOSYASI -->
+    <script src="script.js"></script>
 </body>
 </html>
