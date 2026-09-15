@@ -47,9 +47,10 @@
             
             <!-- Giriş Ekranı -->
             <div id="giris-ekrani" class="sorgu-kutusu">
-                <h2>Yönetici Girişi</h2>
-                <div class="arama-formu" style="margin-top: 15px;">
-                    <input type="password" id="giris-sifre" placeholder="Giriş Şifreniz">
+                <h2>Personel Girişi</h2>
+                <div class="arama-formu" style="display: flex; flex-direction: column; gap: 10px; max-width: 320px; margin: 15px auto 0 auto;">
+                    <input type="text" id="giris-kullanici" placeholder="Kullanıcı Adı" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                    <input type="password" id="giris-sifre" placeholder="Şifre" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
                     <button class="btn-sorgula" onclick="sistemeGirisYap()">Giriş Yap</button>
                 </div>
             </div>
