@@ -1,55 +1,79 @@
-/* GENEL SIFIRLAMA VE TEMEL BİÇİMLENDİRME */
+/* GENEL ARAYÜZ VE TEMEL AYARLAR */
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background-color: #f4f7f6;
-    color: #333;
-    padding-bottom: 50px;
+    background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.90)), 
+                url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+    background-size: cover;
+    color: #1e293b;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* HEADER VE SEKMELER */
+/* HEADER & LOGO BÖLÜMÜ */
 header {
-    background-color: #ffffff;
-    padding: 20px 40px;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    margin-bottom: 30px;
+    padding: 12px 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border-bottom: 2px solid #007bff;
+}
+
+header img {
+    height: 58px !important; /* Logo büyütüldü */
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1));
 }
 
 header h1 {
     font-size: 22px;
-    color: #1a252f;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* NAVIGASYON SEKMELERİ */
+nav {
+    display: flex;
+    gap: 10px;
 }
 
 .sekme-btn {
-    padding: 10px 20px;
+    padding: 10px 18px;
     border: none;
-    background-color: #e9ecef;
-    color: #495057;
-    font-weight: 600;
+    background-color: #e2e8f0;
+    color: #475569;
     border-radius: 6px;
     cursor: pointer;
-    margin-left: 10px;
+    font-weight: 600;
     transition: all 0.2s ease;
 }
 
-.sekme-btn.active, .sekme-btn:hover {
-    background-color: #0d6efd;
-    color: #ffffff;
+.sekme-btn:hover {
+    background-color: #cbd5e1;
 }
 
-/* SAYFA İÇERİKLERİ VE SEKMELER */
+.sekme-btn.active {
+    background-color: #007bff;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+/* ANA İÇERİK KAPSAYICI */
 main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+    max-width: 1300px;
+    width: 95%;
+    margin: 30px auto;
+    flex: 1;
 }
 
 .sekme-icerik {
@@ -60,74 +84,16 @@ main {
     display: block;
 }
 
-/* KARTLAR VE İSTATİSTİKLER (GRID DÜZENİ) */
-.istatistik-kapsayici {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.kart {
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.03);
-    border-left: 5px solid #0d6efd;
-}
-
-.kart h3 {
-    font-size: 14px;
-    color: #6c757d;
-    margin-bottom: 8px;
-}
-
-.kart p {
-    font-size: 28px;
-    font-weight: bold;
-    color: #212529;
-}
-
-.kart-toplam { border-left-color: #0d6efd; }
-.kart-bekleyen { border-left-color: #ffc107; }
-.kart-islemde { border-left-color: #0dcaf0; }
-.kart-tamamlanan { border-left-color: #198754; }
-
-/* KUTULAR VE FORMLAR */
+/* KARTLAR VE KUTULAR (CAM EFEKTİ) */
 .sorgu-kutusu, .form-kapsayici, .liste-kapsayici {
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
     padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.03);
-    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    margin-bottom: 25px;
 }
 
-.panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.rol-rozet {
-    background-color: #e7f1ff;
-    color: #0c63e4;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: bold;
-}
-
-.btn-cikis {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 6px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-/* ARAMA FORMU YAN YANA HİZALAMA */
 .arama-formu {
     display: flex;
     gap: 10px;
@@ -137,60 +103,117 @@ main {
 .arama-formu input {
     flex: 1;
     padding: 12px;
-    border: 1px solid #ced4da;
+    border: 1px solid #cbd5e1;
     border-radius: 6px;
+    font-size: 15px;
+}
+
+.btn-sorgula, .btn-kaydet {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-sorgula:hover, .btn-kaydet:hover {
+    background-color: #0056b3;
+}
+
+/* İSTATİSTİK KARTLARI */
+.istatistik-kapsayici {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.kart {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-top: 4px solid #007bff;
+}
+
+.kart h3 {
     font-size: 14px;
+    color: #64748b;
+    text-transform: uppercase;
 }
 
-.arama-formu .btn-sorgula {
-    width: auto;
-    padding: 12px 25px;
-    white-space: nowrap;
+.kart p {
+    font-size: 28px;
+    font-weight: bold;
+    color: #0f172a;
+    margin-top: 5px;
 }
 
-/* FORM SATIRLARI VE GİRDİLER */
+/* FORM DÜZENİ */
 .form-satir {
     display: flex;
     gap: 15px;
     margin-bottom: 15px;
-    flex-wrap: wrap;
 }
 
 .form-satir input, .form-satir select {
     flex: 1;
-    min-width: 180px;
     padding: 10px 12px;
-    border: 1px solid #ced4da;
+    border: 1px solid #cbd5e1;
     border-radius: 6px;
-    outline: none;
+    font-size: 14px;
 }
 
 .aksesuar-alani {
     align-items: center;
-    gap: 20px;
+    background: #f8fafc;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
 }
 
 .aksesuar-alani label {
+    margin-left: 10px;
     font-size: 14px;
     cursor: pointer;
 }
 
-.btn-kaydet, .btn-sorgula {
-    background-color: #198754;
+/* PANEL HEADER VE BUTONLAR */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.rol-rozet {
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.btn-cikis {
+    background: #ef4444;
     color: white;
     border: none;
-    padding: 12px 25px;
-    font-weight: bold;
+    padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
-    width: 100%;
+    font-weight: 600;
 }
 
-.btn-sorgula {
-    background-color: #0d6efd;
+.btn-cikis:hover {
+    background: #dc2626;
 }
 
-/* TABLO TASARIMI */
+/* TABLO DÜZENİ */
 .tablo-sarmal {
     overflow-x: auto;
 }
@@ -198,43 +221,33 @@ main {
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 15px;
+    margin-top: 10px;
+    background: white;
 }
 
 th, td {
-    padding: 12px 15px;
+    padding: 12px;
     text-align: left;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid #e2e8f0;
     font-size: 14px;
 }
 
 th {
-    background-color: #f8f9fa;
-    color: #495057;
-    font-weight: 600;
+    background-color: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
 }
 
 tr:hover {
-    background-color: #f8f9fa;
+    background-color: #f8fafc;
 }
 
-/* ETİKET BASTIRMA STİLLERİ (TSC RE310 - 50mm x 30mm YENİ İZGARALI DÜZEN) */
+/* MOBİL ETİKET YAZDIRMA STİLLERİ (50mm x 30mm) */
 .yazdir-gizli {
     display: none;
 }
 
 @media print {
-    @page {
-        size: 50mm 30mm;
-        margin: 0;
-    }
-    html, body {
-        width: 50mm;
-        height: 30mm;
-        margin: 0;
-        padding: 0;
-        background: white;
-    }
     body * {
         visibility: hidden;
     }
@@ -248,83 +261,48 @@ tr:hover {
         top: 0;
         width: 50mm;
         height: 30mm;
-        padding: 1.5mm 2mm;
+        padding: 1.5mm;
         box-sizing: border-box;
-        background: white;
         font-family: Arial, sans-serif;
+        background: white;
         color: black;
     }
     .etiket-baslik {
-        font-size: 9pt;
+        font-size: 7pt;
         font-weight: bold;
         text-align: center;
-        border-bottom: 1.5px solid black;
+        border-bottom: 1px solid #000;
         padding-bottom: 1px;
-        margin-bottom: 1.5mm;
-        letter-spacing: 0.5px;
+        margin-bottom: 2px;
     }
     .etiket-govde {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        height: 22mm;
     }
     .etiket-sol {
-        width: 29mm;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-        height: 100%;
+        width: 58%;
+        font-size: 6pt;
+        line-height: 1.1;
     }
     .etiket-satir-sol {
-        font-size: 8pt;
-        line-height: 1.1;
+        margin-bottom: 1.5px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    .etiket-satir-sol small {
-        font-size: 6pt;
-        color: #333;
-        font-weight: normal;
-    }
     .etiket-sag {
-        width: 17mm;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        width: 40%;
+        text-align: center;
     }
-    #lbl-qrcode {
-        width: 16mm;
-        height: 16mm;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    #lbl-qrcode img, #lbl-qrcode canvas {
+    #lbl-qrcode img {
         width: 16mm !important;
         height: 16mm !important;
+        margin: 0 auto;
     }
     .etiket-seri {
-        font-size: 6.5pt;
+        font-size: 5.5pt;
         font-weight: bold;
         margin-top: 1px;
-        text-align: center;
-        white-space: nowrap;
-    }
-}
-
-/* MOBİL UYUMLULUK */
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        gap: 15px;
-    }
-    .form-satir {
-        flex-direction: column;
-    }
-    .form-satir input, .form-satir select {
-        width: 100%;
     }
 }
