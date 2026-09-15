@@ -159,6 +159,41 @@
                     </div>
                 </div>
 
+                <!-- STOK TAKİP SİSTEMİ BÖLÜMÜ -->
+                <div class="form-kapsayici" style="margin-top: 30px;">
+                    <h2>📦 Yedek Parça & Stok Takip Sistemi</h2>
+                    
+                    <form id="stok-formu" style="margin-top: 15px;">
+                        <div class="form-satir">
+                            <input type="text" id="stok-adi" placeholder="Parça / Ürün Adı (Örn: TC21 Dokunmatik Ekran)" required>
+                            <input type="text" id="stok-uyumluluk" placeholder="Uyumlu Cihaz / Model" required>
+                            <input type="number" id="stok-adet" placeholder="Mevcut Adet" min="0" required>
+                            <input type="number" id="stok-kritik" placeholder="Kritik Limit" min="1" value="2" required>
+                            <input type="text" id="stok-fiyat" placeholder="Birim Fiyat ($/₺)" required>
+                        </div>
+                        <button type="submit" class="btn-kaydet" style="margin-top: 10px; background-color: #28a745;">Stok Ekle</button>
+                    </form>
+
+                    <div class="tablo-sarmal" style="margin-top: 20px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Parça / Ürün Adı</th>
+                                    <th>Uyumlu Model</th>
+                                    <th>Mevcut Stok</th>
+                                    <th>Kritik Limit</th>
+                                    <th>Birim Fiyat</th>
+                                    <th>Durum</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stok-listesi">
+                                <!-- JS Dinamik Dolduracak -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         </section>
     </main>
