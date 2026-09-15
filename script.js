@@ -12,31 +12,31 @@ const firebaseConfig = {
 // Firebase Başlat
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const auth = firebase.auth(); // Auth servisini tanımladık
+const auth = firebase.auth(); // Bulut Kimlik Doğrulama Servisi
 
 let aktifKullanici = null;
 let cihazlar = [];
 let stoklar = [];
 
-// SİSTEME GİRİŞ YAP (GÜVENLİ FIREBASE AUTH)
+// SİSTEME GİRİŞ YAP (Sadece Firebase Auth Üzerinden)
 function sistemeGirisYap() {
     const email = document.getElementById('giris-kullanici').value.trim();
     const sifre = document.getElementById('giris-sifre').value.trim();
 
     if (!email || !sifre) {
-        alert("Lütfen e-posta ve şifre giriniz.");
+        alert("Lütfen geçerli bir e-posta ve şifre giriniz.");
         return;
     }
 
-    // Doğrulama doğrudan Firebase Sunucularında yapılıyor!
+    // Giriş kontrolü doğrudan Firebase sunucusunda yapılıyor
     auth.signInWithEmailAndPassword(email, sifre)
         .then((userCredential) => {
-            alert("✅ Giriş başarılı!");
+            alert("✅ Giriş Başarılı!");
             document.getElementById('giris-kullanici').value = "";
             document.getElementById('giris-sifre').value = "";
         })
         .catch((error) => {
-            alert("❌ Giriş Başarısız: " + error.message);
+            alert("❌ Giriş Başarısız: E-posta veya şifre hatalı!");
         });
 }
 
@@ -47,7 +47,7 @@ auth.onAuthStateChanged((user) => {
     const rolRozet = document.getElementById('aktif-rol-bilgisi');
 
     if (user) {
-        // Kullanıcı giriş yapmışsa
+        // Oturum açık ise
         aktifKullanici = user;
         girisEkrani.style.display = "none";
         panelIcerigi.style.display = "block";
@@ -57,7 +57,7 @@ auth.onAuthStateChanged((user) => {
         listeyiGuncelle(cihazlar);
         stokListesiniGuncelle(stoklar);
     } else {
-        // Kullanıcı çıkış yapmışsa
+        // Oturum kapalı ise
         aktifKullanici = null;
         girisEkrani.style.display = "block";
         panelIcerigi.style.display = "none";
@@ -71,7 +71,7 @@ function cikisYap() {
     });
 }
 
-// 1. ANA SEKME DEĞİŞTİRME FONKSİYONU
+// ANA SEKME DEĞİŞTİRME
 function anaSekmeDegistir(sekmeId) {
     document.querySelectorAll('.sekme-icerik').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('nav .sekme-btn').forEach(el => el.classList.remove('active'));
@@ -84,7 +84,7 @@ function anaSekmeDegistir(sekmeId) {
     if(sekmeId === 'yonetici-paneli' && butonlar[1]) butonlar[1].classList.add('active');
 }
 
-// 2. YÖNETİCİ ALT SEKME DEĞİŞTİRME
+// YÖNETİCİ ALT SEKME DEĞİŞTİRME
 function yoneticiSekmeDegistir(subSekmeId) {
     const cihazSekme = document.getElementById('cihaz-yonetimi');
     const stokSekme = document.getElementById('stok-yonetimi');
@@ -104,7 +104,7 @@ function yoneticiSekmeDegistir(subSekmeId) {
     }
 }
 
-// BULUT VERİTABANINI DİNLEME
+// BULUT VERİTABANI CANLI DİNLEME
 db.collection("cihazlar").onSnapshot((snapshot) => {
     cihazlar = [];
     snapshot.forEach((doc) => {
@@ -130,7 +130,7 @@ function kargoAlanlariniYonet() {
     }
 }
 
-// CİHAZ VE STOK FORMLARI
+// FORM DİNLEYİCİLERİ
 document.addEventListener('DOMContentLoaded', () => {
     const cihazFormu = document.getElementById('cihaz-formu');
     if (cihazFormu) {
