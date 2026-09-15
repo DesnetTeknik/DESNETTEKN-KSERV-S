@@ -51,11 +51,13 @@ function sistemeGirisYap() {
         aktifRol = "Eleman";
         girisEkrani.style.display = "none";
         panelIcerigi.style.display = "block";
-        rolRozet.innerText = "Giriş Yapıldı: ELEMAN";
+        rolRozet.innerText = "Giriş Yapıldı: ELEMAN (Kısıtlı Yetki)";
         document.getElementById('giris-sifre').value = "";
     } else {
         alert("❌ Hatalı şifre girdiniz!");
+        return;
     }
+    listeyiGuncelle(cihazlar);
 }
 
 // 3. ÇIKIŞ YAPMA FONKSİYONU
@@ -169,7 +171,7 @@ function tablodaAra() {
     listeyiGuncelle(filtrelenmis);
 }
 
-// 9. LİSTEYİ VE İSTATİSTİKLERİ GÜNCELLEME
+// 9. LİSTEYİ VE İSTATİSTİKLERİ GÜNCELLEME (YETKİ KONTROLLÜ)
 function listeyiGuncelle(liste) {
     if (!cihazListesi) return;
     cihazListesi.innerHTML = '';
@@ -180,6 +182,10 @@ function listeyiGuncelle(liste) {
         if (c.durum === 'Bekliyor') bekleyen++;
         if (c.durum === 'İşlemde') islemde++;
         if (c.durum === 'Tamamlandı') tamamlanan++;
+
+        const silButonHtml = (aktifRol === "Patron") 
+            ? `<button onclick="cihazSil('${c.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px;">Sil</button>` 
+            : '';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -200,7 +206,7 @@ function listeyiGuncelle(liste) {
             </td>
             <td>
                 <button onclick="etiketYazdir('${c.firebaseId}')" style="background:#0d6efd; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px; margin-right:4px;">Yazdır</button>
-                <button onclick="cihazSil('${c.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px;">Sil</button>
+                ${silButonHtml}
             </td>
         `;
         cihazListesi.appendChild(tr);
@@ -212,7 +218,7 @@ function listeyiGuncelle(liste) {
     if (document.getElementById('tamamlanan-sayi')) document.getElementById('tamamlanan-sayi').innerText = tamamlanan;
 }
 
-// 10. DURUM GÜNCELLEME VE SİLME
+// 10. DURUM GÜNCELLEME VE SİLME (PATRON YETKİ KONTROLÜ)
 function durumDegistir(firebaseId, yeniDurum) {
     db.collection("cihazlar").doc(firebaseId).update({
         durum: yeniDurum,
@@ -221,43 +227,41 @@ function durumDegistir(firebaseId, yeniDurum) {
 }
 
 function cihazSil(firebaseId) {
+    if (aktifRol !== "Patron") {
+        alert("❌ Bu işlem için yetkiniz yok! Yalnızca PATRON silme işlemi yapabilir.");
+        return;
+    }
     if (confirm('Bu kaydı bulut veritabanından silmek istediğinize emin misiniz?')) {
         db.collection("cihazlar").doc(firebaseId).delete();
     }
 }
 
-// 11. ETİKET YAZDIRMA FONKSİYONU (Geliştirilmiş & Senkronize)
+// 11. ETİKET YAZDIRMA FONKSİYONU (KUSURSUZ GÖRSEL VE QR HİZALAMA)
 function etiketYazdir(firebaseId) {
     const cihaz = cihazlar.find(c => c.firebaseId === firebaseId);
     if (!cihaz) return;
 
-    // Etiket alanındaki metinleri doldur
     document.getElementById('lbl-musteri').innerText = cihaz.musteriAdi || '-';
     document.getElementById('lbl-cihaz').innerText = `${cihaz.cihazTipi || ''} ${cihaz.marka || ''}`.trim();
     document.getElementById('lbl-tarih').innerText = cihaz.girisTarihi || '-';
     document.getElementById('lbl-serino').innerText = cihaz.seriNo || '-';
 
-    // QR Kod Kapsayıcısını Temizle
     const qrKapsayici = document.getElementById('lbl-qrcode');
     qrKapsayici.innerHTML = "";
 
-    // Hızlı ve Guvenli QR Oluşturma (QuickChart API fallback destegi ile)
     const qrText = encodeURIComponent(cihaz.seriNo || '000000');
     
-    // Basit ve doğrudan img elementi oluşturarak QR kütüphanesinin render gecikmesini sıfırlıyoruz:
     const qrImg = document.createElement('img');
     qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=${qrText}`;
     qrImg.style.width = "64px";
     qrImg.style.height = "64px";
     
-    // QR Resmi yüklendiğinde baskıyı başlat
     qrImg.onload = function() {
         setTimeout(() => {
             window.print();
         }, 100);
     };
 
-    // Resim yüklenemezse bile baskı akışını kesmeme garantisi
     qrImg.onerror = function() {
         window.print();
     };
