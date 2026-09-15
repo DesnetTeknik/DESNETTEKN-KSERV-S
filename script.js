@@ -9,7 +9,7 @@ const firebaseConfig = {
     measurementId: "G-NK5KLZVW0G"
 };
 
-// Firebase Başlatma Kontrolü
+// Firebase Başlat
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
@@ -17,37 +17,63 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// SAYFA SEKMELERİ ARASINDA GEÇİŞ
-function sayfaDegistir(sayfaAdi) {
+// SAYFA TIKLAMA VE GEÇİŞ OLAYLARI (DOM YÜKLENDİKTEN SONRA)
+document.addEventListener("DOMContentLoaded", function() {
+    
+    const btnSorgulaSekme = document.getElementById('btn-sorgula-sekme');
+    const btnPanelSekme = document.getElementById('btn-panel-sekme');
     const sorgulamaSayfasi = document.getElementById('sorgulama-sayfasi');
     const panelSayfasi = document.getElementById('panel-sayfasi');
-    const navButonlar = document.querySelectorAll('.nav-btn');
 
-    if (sayfaAdi === 'sorgulama') {
-        sorgulamaSayfasi.classList.add('active');
-        panelSayfasi.classList.remove('active');
-        navButonlar[0].classList.add('active');
-        navButonlar[1].classList.remove('active');
-    } else if (sayfaAdi === 'panel') {
-        panelSayfasi.classList.add('active');
-        sorgulamaSayfasi.classList.remove('active');
-        navButonlar[1].classList.add('active');
-        navButonlar[0].classList.remove('active');
+    // Müşteri Sorgulama Sekmesi Tıklama
+    if(btnSorgulaSekme) {
+        btnSorgulaSekme.addEventListener('click', function() {
+            sorgulamaSayfasi.style.display = 'block';
+            panelSayfasi.style.display = 'none';
+            btnSorgulaSekme.classList.add('active');
+            btnPanelSekme.classList.remove('active');
+        });
     }
-}
 
-// YÖNETİCİ GİRİŞİ YAPMA
+    // Yönetici Paneli Sekmesi Tıklama
+    if(btnPanelSekme) {
+        btnPanelSekme.addEventListener('click', function() {
+            sorgulamaSayfasi.style.display = 'none';
+            panelSayfasi.style.display = 'block';
+            btnPanelSekme.classList.add('active');
+            btnSorgulaSekme.classList.remove('active');
+        });
+    }
+
+    // Giriş Yap Butonu Tıklama
+    const btnGiris = document.getElementById('btn-giris-yap');
+    if(btnGiris) {
+        btnGiris.addEventListener('click', sistemeGirisYap);
+    }
+
+    // Çıkış Yap Butonu Tıklama
+    const btnCikis = document.getElementById('btn-cikis-yap');
+    if(btnCikis) {
+        btnCikis.addEventListener('click', sistemdenCikisYap);
+    }
+
+    // Sorgula Butonu Tıklama
+    const btnSorguIslem = document.getElementById('btn-sorgula-islem');
+    if(btnSorguIslem) {
+        btnSorguIslem.addEventListener('click', cihazSorgula);
+    }
+
+    // Yeni Kayıt Formu Gönderme
+    const kayitFormu = document.getElementById('yeni-kayit-formu');
+    if(kayitFormu) {
+        kayitFormu.addEventListener('submit', yeniKayitEkle);
+    }
+});
+
+// YÖNETİCİ GİRİŞİ
 function sistemeGirisYap() {
-    const emailInput = document.getElementById('giris-kullanici');
-    const sifreInput = document.getElementById('giris-sifre');
-
-    if (!emailInput || !sifreInput) {
-        alert("Giriş form alanları bulunamadı!");
-        return;
-    }
-
-    const email = emailInput.value.trim();
-    const sifre = sifreInput.value.trim();
+    const email = document.getElementById('giris-kullanici').value.trim();
+    const sifre = document.getElementById('giris-sifre').value.trim();
 
     if (!email || !sifre) {
         alert("Lütfen e-posta ve şifrenizi giriniz.");
@@ -69,11 +95,11 @@ function sistemdenCikisYap() {
     auth.signOut().then(() => {
         alert("Çıkış yapıldı.");
     }).catch((error) => {
-        alert("Çıkış yapılırken hata oluştu: " + error.message);
+        alert("Çıkış hatası: " + error.message);
     });
 }
 
-// OTURUM DURUMU DİNLEYİCİSİ
+// OTURUM DURUMU KONTROLÜ
 auth.onAuthStateChanged((user) => {
     const girisEkrani = document.getElementById('giris-ekrani');
     const panelIcerigi = document.getElementById('panel-icerigi');
@@ -90,7 +116,7 @@ auth.onAuthStateChanged((user) => {
     }
 });
 
-// MÜŞTERİ CİHAZ SORGULAMA (FIRESTORE)
+// MÜŞTERİ CİHAZ SORGULAMA
 function cihazSorgula() {
     const sorguNo = document.getElementById('sorgu-no').value.trim();
     const sorguSn = document.getElementById('sorgu-sn').value.trim();
@@ -137,7 +163,6 @@ function yeniKayitEkle(e) {
     const durum = document.getElementById('kayit-durum').value;
     const aciklama = document.getElementById('kayit-aciklama').value.trim();
 
-    // Otomatik Takip No Üret (Örn: DES-1042)
     const takipNo = "DES-" + Math.floor(1000 + Math.random() * 9000);
 
     db.collection("servis_kayitlari").add({
@@ -159,7 +184,7 @@ function yeniKayitEkle(e) {
     });
 }
 
-// YÖNETİCİ PANELİ SERVİS LİSTESİNİ YÜKLEME
+// SERVİS LİSTESİNİ YÜKLE
 function servisListesiniYukle() {
     const listBody = document.getElementById('servis-listesi-body');
     if (!listBody) return;
@@ -190,7 +215,7 @@ function servisListesiniYukle() {
         });
 }
 
-// KAYIT SİLME
+// KAYIT SİL
 function kayitSil(docId) {
     if (confirm("Bu kayıt silinecek. Onaylıyor musunuz?")) {
         db.collection("servis_kayitlari").doc(docId).delete()
@@ -199,7 +224,7 @@ function kayitSil(docId) {
                 servisListesiniYukle();
             })
             .catch((error) => {
-                alert("Silme işlemi sırasında hata oluştu: " + error.message);
+                alert("Silme hatası: " + error.message);
             });
     }
 }
