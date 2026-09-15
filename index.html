@@ -18,7 +18,10 @@
 <body>
 
     <header>
-        <h1>Teknik Servis Takip Sistemi</h1>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <img src="logo.png" alt="Logo" style="height: 40px; width: auto;" onerror="this.style.display='none'">
+            <h1 style="margin: 0;">Teknik Servis Takip Sistemi</h1>
+        </div>
         <nav>
             <button class="sekme-btn active" onclick="sekmeDegistir('musteri-paneli')">Müşteri Sorgulama</button>
             <button class="sekme-btn" onclick="sekmeDegistir('yonetici-paneli')">Yönetici Paneli</button>
@@ -161,7 +164,10 @@
 
     <!-- MOBİL YAZICI ETİKET ŞABLONU (50mm x 30mm - 2 SÜTUNLU YAPI) -->
     <div id="etiket-alani" class="yazdir-gizli">
-        <div class="etiket-baslik">DESNET TEKNİK SERVİS</div>
+        <div class="etiket-baslik" style="display:flex; align-items:center; justify-content:center; gap:4px;">
+            <img src="logo.png" style="height:12px; width:auto;" onerror="this.style.display='none'">
+            DESNET TEKNİK SERVİS
+        </div>
         <div class="etiket-govde">
             <div class="etiket-sol">
                 <div class="etiket-satir-sol"><small>MÜŞTERİ:</small><br><strong id="lbl-musteri">-</strong></div>
