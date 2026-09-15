@@ -1,6 +1,6 @@
-// FIREBASE BULUT YAPILANDIRMASI
+// FIREBASE YAPILANDIRMASI
 const firebaseConfig = {
-    apiKey: "1:200503339006:web:0e940ae8a383a802a042af",
+    apiKey: "AIzaSyCjVuS94dkxNLPfp04Eqgty0sj7Xo0qc6s",
     authDomain: "desnetteknik-66527.firebaseapp.com",
     projectId: "desnetteknik-66527",
     storageBucket: "desnetteknik-66527.firebasestorage.app",
@@ -9,372 +9,197 @@ const firebaseConfig = {
     measurementId: "G-NK5KLZVW0G"
 };
 
-// Firebase Başlat
+// Firebase Başlatma Kontrolü
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
+
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-let aktifKullanici = null;
-let cihazlar = [];
-let stoklar = [];
+// SAYFA SEKMELERİ ARASINDA GEÇİŞ
+function sayfaDegistir(sayfaAdi) {
+    const sorgulamaSayfasi = document.getElementById('sorgulama-sayfasi');
+    const panelSayfasi = document.getElementById('panel-sayfasi');
+    const navButonlar = document.querySelectorAll('.nav-btn');
 
-// SİSTEME GİRİŞ YAP (GÜVENLİ FIREBASE AUTH)
+    if (sayfaAdi === 'sorgulama') {
+        sorgulamaSayfasi.classList.add('active');
+        panelSayfasi.classList.remove('active');
+        navButonlar[0].classList.add('active');
+        navButonlar[1].classList.remove('active');
+    } else if (sayfaAdi === 'panel') {
+        panelSayfasi.classList.add('active');
+        sorgulamaSayfasi.classList.remove('active');
+        navButonlar[1].classList.add('active');
+        navButonlar[0].classList.remove('active');
+    }
+}
+
+// YÖNETİCİ GİRİŞİ YAPMA
 function sistemeGirisYap() {
-    const email = document.getElementById('giris-kullanici').value.trim();
-    const sifre = document.getElementById('giris-sifre').value.trim();
+    const emailInput = document.getElementById('giris-kullanici');
+    const sifreInput = document.getElementById('giris-sifre');
 
-    if (!email || !sifre) {
-        alert("Lütfen e-posta ve şifre giriniz.");
+    if (!emailInput || !sifreInput) {
+        alert("Giriş form alanları bulunamadı!");
         return;
     }
 
-    // Doğrulama doğrudan Firebase Sunucularında yapılıyor
+    const email = emailInput.value.trim();
+    const sifre = sifreInput.value.trim();
+
+    if (!email || !sifre) {
+        alert("Lütfen e-posta ve şifrenizi giriniz.");
+        return;
+    }
+
     auth.signInWithEmailAndPassword(email, sifre)
         .then((userCredential) => {
-            alert("✅ Giriş başarılı!");
-            document.getElementById('giris-kullanici').value = "";
-            document.getElementById('giris-sifre').value = "";
+            alert("✅ Giriş Başarılı!");
         })
         .catch((error) => {
             console.error("Firebase Auth Hatası:", error);
-            alert("❌ Hata Kodu: " + error.code + "\nDetay: " + error.message);
+            alert("❌ Giriş Yapılamadı!\nHata Kodu: " + error.code + "\nDetay: " + error.message);
         });
 }
 
-// OTURUM DURUMUNU CANLI DİNLEME
+// OTURUMU KAPATMA
+function sistemdenCikisYap() {
+    auth.signOut().then(() => {
+        alert("Çıkış yapıldı.");
+    }).catch((error) => {
+        alert("Çıkış yapılırken hata oluştu: " + error.message);
+    });
+}
+
+// OTURUM DURUMU DİNLEYİCİSİ
 auth.onAuthStateChanged((user) => {
     const girisEkrani = document.getElementById('giris-ekrani');
     const panelIcerigi = document.getElementById('panel-icerigi');
     const rolRozet = document.getElementById('aktif-rol-bilgisi');
 
     if (user) {
-        // Kullanıcı giriş yapmışsa
-        aktifKullanici = user;
-        girisEkrani.style.display = "none";
-        panelIcerigi.style.display = "block";
-        rolRozet.innerText = `Oturum Açık: ${user.email}`;
-
-        yoneticiSekmeDegistir('cihaz-yonetimi');
-        listeyiGuncelle(cihazlar);
-        stokListesiniGuncelle(stoklar);
+        if (girisEkrani) girisEkrani.style.display = "none";
+        if (panelIcerigi) panelIcerigi.style.display = "block";
+        if (rolRozet) rolRozet.innerText = `Oturum Açık: ${user.email}`;
+        servisListesiniYukle();
     } else {
-        // Kullanıcı çıkış yapmışsa
-        aktifKullanici = null;
-        girisEkrani.style.display = "block";
-        panelIcerigi.style.display = "none";
+        if (girisEkrani) girisEkrani.style.display = "block";
+        if (panelIcerigi) panelIcerigi.style.display = "none";
     }
 });
 
-// ÇIKIŞ YAP
-function cikisYap() {
-    auth.signOut().then(() => {
-        alert("Çıkış yapıldı.");
-    });
-}
+// MÜŞTERİ CİHAZ SORGULAMA (FIRESTORE)
+function cihazSorgula() {
+    const sorguNo = document.getElementById('sorgu-no').value.trim();
+    const sorguSn = document.getElementById('sorgu-sn').value.trim();
 
-// ANA SEKME DEĞİŞTİRME
-function anaSekmeDegistir(sekmeId) {
-    document.querySelectorAll('.sekme-icerik').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('nav .sekme-btn').forEach(el => el.classList.remove('active'));
-    
-    const hedef = document.getElementById(sekmeId);
-    if(hedef) hedef.classList.add('active');
-    
-    const butonlar = document.querySelectorAll('nav .sekme-btn');
-    if(sekmeId === 'musteri-paneli' && butonlar[0]) butonlar[0].classList.add('active');
-    if(sekmeId === 'yonetici-paneli' && butonlar[1]) butonlar[1].classList.add('active');
-}
-
-// YÖNETİCİ ALT SEKME DEĞİŞTİRME
-function yoneticiSekmeDegistir(subSekmeId) {
-    const cihazSekme = document.getElementById('cihaz-yonetimi');
-    const stokSekme = document.getElementById('stok-yonetimi');
-    const btnCihaz = document.getElementById('btn-sub-cihaz');
-    const btnStok = document.getElementById('btn-sub-stok');
-
-    if (subSekmeId === 'cihaz-yonetimi') {
-        if(cihazSekme) cihazSekme.style.display = 'block';
-        if(stokSekme) stokSekme.style.display = 'none';
-        if(btnCihaz) btnCihaz.classList.add('active');
-        if(btnStok) btnStok.classList.remove('active');
-    } else if (subSekmeId === 'stok-yonetimi') {
-        if(cihazSekme) cihazSekme.style.display = 'none';
-        if(stokSekme) stokSekme.style.display = 'block';
-        if(btnCihaz) btnCihaz.classList.remove('active');
-        if(btnStok) btnStok.classList.add('active');
-    }
-}
-
-// BULUT VERİTABANINI DİNLEME
-db.collection("cihazlar").onSnapshot((snapshot) => {
-    cihazlar = [];
-    snapshot.forEach((doc) => {
-        cihazlar.push({ firebaseId: doc.id, ...doc.data() });
-    });
-    listeyiGuncelle(cihazlar);
-});
-
-db.collection("stoklar").onSnapshot((snapshot) => {
-    stoklar = [];
-    snapshot.forEach((doc) => {
-        stoklar.push({ firebaseId: doc.id, ...doc.data() });
-    });
-    stokListesiniGuncelle(stoklar);
-});
-
-// KARGO ALANI YÖNETİMİ
-function kargoAlanlariniYonet() {
-    const gelisTipi = document.getElementById('gelis-tipi').value;
-    const kargoAlani = document.getElementById('kargo-detay-alani');
-    if (kargoAlani) {
-        kargoAlani.style.display = (gelisTipi === 'Kargo') ? 'flex' : 'none';
-    }
-}
-
-// CİHAZ VE STOK FORMLARI
-document.addEventListener('DOMContentLoaded', () => {
-    const cihazFormu = document.getElementById('cihaz-formu');
-    if (cihazFormu) {
-        cihazFormu.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const secilenAksesuarlar = [];
-            document.querySelectorAll('.aksesuar-cb:checked').forEach(cb => {
-                secilenAksesuarlar.push(cb.value);
-            });
-
-            const yeniCihaz = {
-                id: Date.now(),
-                musteriAdi: document.getElementById('musteri-adi').value,
-                telefon: document.getElementById('telefon').value,
-                cihazTipi: document.getElementById('cihaz-tipi').value,
-                marka: document.getElementById('marka').value,
-                seriNo: document.getElementById('seri-no').value,
-                ariza: document.getElementById('ariza').value,
-                gelisTipi: document.getElementById('gelis-tipi').value,
-                kargoFirmasi: document.getElementById('kargo-firmasi').value || '-',
-                kargoKodu: document.getElementById('kargo-kodu').value || '-',
-                aksesuarlar: secilenAksesuarlar.join(', ') || 'Yok',
-                durum: 'Bekliyor',
-                girisTarihi: new Date().toLocaleDateString('tr-TR'),
-                cikisTarihi: '-',
-                kaydeden: aktifKullanici ? aktifKullanici.email : 'Bilinmiyor'
-            };
-
-            db.collection("cihazlar").add(yeniCihaz).then(() => {
-                alert('✅ Cihaz kaydı eklendi!');
-                cihazFormu.reset();
-                kargoAlanlariniYonet();
-            }).catch((err) => {
-                alert('❌ Hata: ' + err.message);
-            });
-        });
+    if (!sorguNo || !sorguSn) {
+        alert("Lütfen hem Servis Takip Numarasını hem de Seri Numarasını giriniz.");
+        return;
     }
 
-    const stokFormu = document.getElementById('stok-formu');
-    if (stokFormu) {
-        stokFormu.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            if (!aktifKullanici) {
-                alert("❌ İşlem için giriş yapmalısınız.");
-                return;
+    db.collection("servis_kayitlari")
+        .where("takipNo", "==", sorguNo)
+        .where("seriNo", "==", sorguSn)
+        .get()
+        .then((querySnapshot) => {
+            const sonucKutu = document.getElementById('sorgu-sonuc');
+            if (!querySnapshot.empty) {
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    document.getElementById('sonuc-musteri').innerText = data.musteri || "-";
+                    document.getElementById('sonuc-cihaz').innerText = data.cihaz || "-";
+                    document.getElementById('sonuc-sn').innerText = data.seriNo || "-";
+                    document.getElementById('sonuc-durum').innerText = data.durum || "-";
+                    document.getElementById('sonuc-aciklama').innerText = data.aciklama || "Açıklama girilmemiş.";
+                    sonucKutu.style.display = "block";
+                });
+            } else {
+                sonucKutu.style.display = "none";
+                alert("Aradığınız kriterlere uygun cihaz kaydı bulunamadı.");
             }
-
-            const yeniStok = {
-                stokAdi: document.getElementById('stok-adi').value,
-                uyumluluk: document.getElementById('stok-uyumluluk').value,
-                adet: parseInt(document.getElementById('stok-adet').value) || 0,
-                kritikLimit: parseInt(document.getElementById('stok-kritik').value) || 2,
-                fiyat: document.getElementById('stok-fiyat').value,
-                ekleyen: aktifKullanici.email
-            };
-
-            db.collection("stoklar").add(yeniStok).then(() => {
-                alert('✅ Yeni yedek parça stoğa eklendi!');
-                stokFormu.reset();
-            }).catch((err) => {
-                alert('❌ Stok ekleme hatası: ' + err.message);
-            });
+        })
+        .catch((error) => {
+            console.error("Sorgulama hatası:", error);
+            alert("Sorgulama sırasında bir hata oluştu: " + error.message);
         });
-    }
-});
-
-// MÜŞTERİ SORGULAMA
-function musteriSorgula() {
-    const aramaMetni = document.getElementById('musteri-sorgu-input').value.trim().toLowerCase();
-    const sonucAlani = document.getElementById('musteri-sonuc-alani');
-    
-    if (!aramaMetni) {
-        sonucAlani.innerHTML = "<p style='color:red; margin-top:15px;'>Lütfen Firma Adı veya Seri No giriniz.</p>";
-        return;
-    }
-
-    const eslesenler = cihazlar.filter(c => 
-        c.musteriAdi.toLowerCase().includes(aramaMetni) || 
-        c.seriNo.toLowerCase().includes(aramaMetni)
-    );
-
-    if (eslesenler.length === 0) {
-        sonucAlani.innerHTML = "<p style='margin-top:15px;'>Cihaz bulunamadı.</p>";
-        return;
-    }
-
-    let html = "<div style='margin-top:20px;'>";
-    eslesenler.forEach(c => {
-        html += `
-            <div style="background:#f4f4f4; padding:15px; margin-bottom:10px; border-radius:5px; border-left:5px solid #007bff;">
-                <h3>${c.musteriAdi} - [${c.cihazTipi}] ${c.marka}</h3>
-                <p><strong>Seri No:</strong> ${c.seriNo}</p>
-                <p><strong>Arıza:</strong> ${c.ariza}</p>
-                <p><strong>Durum:</strong> <span style="font-weight:bold; color:blue;">${c.durum}</span></p>
-                <p><strong>Giriş Tarihi:</strong> ${c.girisTarihi} | <strong>Çıkış Tarihi:</strong> ${c.cikisTarihi}</p>
-            </div>
-        `;
-    });
-    html += "</div>";
-    sonucAlani.innerHTML = html;
 }
 
-function tablodaAra() {
-    const aramaMetni = document.getElementById('tablo-arama').value.toLowerCase();
-    const filtrelenmis = cihazlar.filter(c => 
-        c.musteriAdi.toLowerCase().includes(aramaMetni) ||
-        c.seriNo.toLowerCase().includes(aramaMetni) ||
-        c.marka.toLowerCase().includes(aramaMetni)
-    );
-    listeyiGuncelle(filtrelenmis);
-}
+// YENİ SERVİS KAYDI EKLEME
+function yeniKayitEkle(e) {
+    e.preventDefault();
 
-function stokAramaYap() {
-    const aramaMetni = document.getElementById('stok-arama').value.toLowerCase();
-    const filtrelenmis = stoklar.filter(s => 
-        s.stokAdi.toLowerCase().includes(aramaMetni) ||
-        s.uyumluluk.toLowerCase().includes(aramaMetni)
-    );
-    stokListesiniGuncelle(filtrelenmis);
-}
+    const musteri = document.getElementById('kayit-musteri').value.trim();
+    const cihaz = document.getElementById('kayit-cihaz').value.trim();
+    const seriNo = document.getElementById('kayit-sn').value.trim();
+    const durum = document.getElementById('kayit-durum').value;
+    const aciklama = document.getElementById('kayit-aciklama').value.trim();
 
-function listeyiGuncelle(liste) {
-    const cihazListesi = document.getElementById('cihaz-listesi');
-    if (!cihazListesi) return;
-    cihazListesi.innerHTML = '';
-    
-    let bekleyen = 0, islemde = 0, tamamlanan = 0;
+    // Otomatik Takip No Üret (Örn: DES-1042)
+    const takipNo = "DES-" + Math.floor(1000 + Math.random() * 9000);
 
-    liste.forEach((c) => {
-        if (c.durum === 'Bekliyor') bekleyen++;
-        if (c.durum === 'İşlemde') islemde++;
-        if (c.durum === 'Tamamlandı') tamamlanan++;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${c.girisTarihi || '-'}</td>
-            <td>${c.cikisTarihi || '-'}</td>
-            <td>${c.gelisTipi || 'Elden'}</td>
-            <td><strong>${c.musteriAdi}</strong><br><small>${c.telefon}</small></td>
-            <td>[${c.cihazTipi}] ${c.marka}</td>
-            <td><code>${c.seriNo}</code></td>
-            <td>${c.aksesuarlar || '-'}</td>
-            <td>${c.ariza}</td>
-            <td>
-                <select onchange="durumDegistir('${c.firebaseId}', this.value)">
-                    <option value="Bekliyor" ${c.durum === 'Bekliyor' ? 'selected' : ''}>Bekliyor</option>
-                    <option value="İşlemde" ${c.durum === 'İşlemde' ? 'selected' : ''}>İşlemde</option>
-                    <option value="Tamamlandı" ${c.durum === 'Tamamlandı' ? 'selected' : ''}>Tamamlandı</option>
-                </select>
-            </td>
-            <td>
-                <button onclick="etiketYazdir('${c.firebaseId}')" style="background:#0d6efd; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px; margin-right:4px;">Yazdır</button>
-                <button onclick="cihazSil('${c.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px;">Sil</button>
-            </td>
-        `;
-        cihazListesi.appendChild(tr);
-    });
-
-    if (document.getElementById('toplam-sayi')) document.getElementById('toplam-sayi').innerText = liste.length;
-    if (document.getElementById('bekleyen-sayi')) document.getElementById('bekleyen-sayi').innerText = bekleyen;
-    if (document.getElementById('islemde-sayi')) document.getElementById('islemde-sayi').innerText = islemde;
-    if (document.getElementById('tamamlanan-sayi')) document.getElementById('tamamlanan-sayi').innerText = tamamlanan;
-}
-
-function stokListesiniGuncelle(liste) {
-    const stokListesi = document.getElementById('stok-listesi');
-    if (!stokListesi) return;
-    stokListesi.innerHTML = '';
-
-    liste.forEach((s) => {
-        const kritikDurum = s.adet <= s.kritikLimit;
-        const durumBadge = kritikDurum 
-            ? `<span style="background:#dc3545; color:white; padding:3px 8px; border-radius:10px; font-size:12px; font-weight:bold;">⚠️ Kritik Stok</span>` 
-            : `<span style="background:#28a745; color:white; padding:3px 8px; border-radius:10px; font-size:12px;">✅ Yeterli</span>`;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${s.stokAdi}</strong></td>
-            <td>${s.uyumluluk}</td>
-            <td><b style="font-size:16px;">${s.adet}</b> Adet</td>
-            <td>${s.kritikLimit}</td>
-            <td>${s.fiyat}</td>
-            <td>${durumBadge}</td>
-            <td>
-                <button onclick="stokAdetGuncelle('${s.firebaseId}', ${s.adet + 1})" style="background:#198754; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px; margin-right:2px;">+</button>
-                <button onclick="stokAdetGuncelle('${s.firebaseId}', ${s.adet - 1})" style="background:#ffc107; color:black; border:none; padding:4px 8px; cursor:pointer; border-radius:3px; margin-right:4px;">-</button>
-                <button onclick="stokSil('${s.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px;">Sil</button>
-            </td>
-        `;
-        stokListesi.appendChild(tr);
+    db.collection("servis_kayitlari").add({
+        takipNo: takipNo,
+        musteri: musteri,
+        cihaz: cihaz,
+        seriNo: seriNo,
+        durum: durum,
+        aciklama: aciklama,
+        tarih: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+        alert("✅ Kayıt Oluşturuldu!\nServis Takip No: " + takipNo);
+        document.getElementById('yeni-kayit-formu').reset();
+        servisListesiniYukle();
+    })
+    .catch((error) => {
+        alert("Kayıt eklenirken hata oluştu: " + error.message);
     });
 }
 
-function stokAdetGuncelle(firebaseId, yeniAdet) {
-    if (yeniAdet < 0) return;
-    db.collection("stoklar").doc(firebaseId).update({ adet: yeniAdet });
+// YÖNETİCİ PANELİ SERVİS LİSTESİNİ YÜKLEME
+function servisListesiniYukle() {
+    const listBody = document.getElementById('servis-listesi-body');
+    if (!listBody) return;
+
+    db.collection("servis_kayitlari").orderBy("tarih", "desc").get()
+        .then((querySnapshot) => {
+            listBody.innerHTML = "";
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const row = `
+                    <tr>
+                        <td><strong>${data.takipNo || '-'}</strong></td>
+                        <td>${data.musteri || '-'}</td>
+                        <td>${data.cihaz || '-'}</td>
+                        <td>${data.seriNo || '-'}</td>
+                        <td><span class="durum-rozet">${data.durum || '-'}</span></td>
+                        <td>${data.aciklama || '-'}</td>
+                        <td>
+                            <button class="btn-danger-sm" onclick="kayitSil('${doc.id}')">Sil</button>
+                        </td>
+                    </tr>
+                `;
+                listBody.innerHTML += row;
+            });
+        })
+        .catch((error) => {
+            console.error("Liste yükleme hatası:", error);
+        });
 }
 
-function stokSil(firebaseId) {
-    if (confirm('Bu parça stoğunu silmek istediğinize emin misiniz?')) {
-        db.collection("stoklar").doc(firebaseId).delete();
+// KAYIT SİLME
+function kayitSil(docId) {
+    if (confirm("Bu kayıt silinecek. Onaylıyor musunuz?")) {
+        db.collection("servis_kayitlari").doc(docId).delete()
+            .then(() => {
+                alert("Kayıt başarıyla silindi.");
+                servisListesiniYukle();
+            })
+            .catch((error) => {
+                alert("Silme işlemi sırasında hata oluştu: " + error.message);
+            });
     }
-}
-
-function durumDegistir(firebaseId, yeniDurum) {
-    db.collection("cihazlar").doc(firebaseId).update({
-        durum: yeniDurum,
-        cikisTarihi: yeniDurum === 'Tamamlandı' ? new Date().toLocaleDateString('tr-TR') : '-'
-    });
-}
-
-function cihazSil(firebaseId) {
-    if (confirm('Bu kaydı bulut veritabanından silmek istediğinize emin misiniz?')) {
-        db.collection("cihazlar").doc(firebaseId).delete();
-    }
-}
-
-function etiketYazdir(firebaseId) {
-    const cihaz = cihazlar.find(c => c.firebaseId === firebaseId);
-    if (!cihaz) return;
-
-    document.getElementById('lbl-musteri').innerText = cihaz.musteriAdi || '-';
-    document.getElementById('lbl-cihaz').innerText = `${cihaz.cihazTipi || ''} ${cihaz.marka || ''}`.trim();
-    document.getElementById('lbl-tarih').innerText = cihaz.girisTarihi || '-';
-    document.getElementById('lbl-serino').innerText = cihaz.seriNo || '-';
-
-    const qrKapsayici = document.getElementById('lbl-qrcode');
-    qrKapsayici.innerHTML = "";
-
-    const qrText = encodeURIComponent(cihaz.seriNo || '000000');
-    const qrImg = document.createElement('img');
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=${qrText}`;
-    qrImg.style.width = "64px";
-    qrImg.style.height = "64px";
-    
-    qrImg.onload = function() {
-        setTimeout(() => { window.print(); }, 100);
-    };
-    qrImg.onerror = function() { window.print(); };
-
-    qrKapsayici.appendChild(qrImg);
 }
