@@ -5,237 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teknik Servis Takip Sistemi</title>
     
-    <!-- CSS Stil Dosyası -->
+    <!-- CSS Dosyası -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- Firebase SDK Kütüphaneleri -->
-    <<!-- Firebase SDK Kütüphaneleri -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <!-- QR Kod Üretici -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Firebase SDK (v9 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-    <header>
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <img src="logo.png" alt="Logo" style="height: 40px; width: auto;" onerror="this.style.display='none'">
-            <h1 style="margin: 0;">Teknik Servis Takip Sistemi</h1>
+    <!-- ÜST MENÜ (NAVBAR) -->
+    <header class="navbar">
+        <div class="logo">
+            <h2>Teknik Servis Takip Sistemi</h2>
         </div>
         <nav>
-            <button class="sekme-btn active" onclick="anaSekmeDegistir('musteri-paneli')">Müşteri Sorgulama</button>
-            <button class="sekme-btn" onclick="anaSekmeDegistir('yonetici-paneli')">Yönetici Paneli</button>
+            <button class="nav-btn active" onclick="sayfaDegistir('sorgulama')">Müşteri Sorgulama</button>
+            <button class="nav-btn" onclick="sayfaDegistir('panel')">Yönetici Paneli</button>
         </nav>
     </header>
 
-    <main>
-        <!-- MÜŞTERİ SORGULAMA PANELİ -->
-        <section id="musteri-paneli" class="sekme-icerik active">
-            <div class="sorgu-kutusu">
-                <h2>Cihaz Durumu Sorgulama</h2>
-                <p>Cihazınızın durumunu öğrenmek için Firma Adı veya Seri No (S/N) giriniz.</p>
-                <div class="arama-formu">
-                    <input type="text" id="musteri-sorgu-input" placeholder="Örn: Desnet veya S/N: 12345">
-                    <button class="btn-sorgula" onclick="musteriSorgula()">Sorgula</button>
-                </div>
-                <div id="musteri-sonuc-alani"></div>
-            </div>
-        </section>
-
-        <!-- YÖNETİCİ PANELİ -->
-        <section id="yonetici-paneli" class="sekme-icerik">
+    <!-- SAYFA 1: MÜŞTERİ SORGULAMA -->
+    <section id="sorgulama-sayfasi" class="sayfa-alani active">
+        <div class="sorgu-kutu">
+            <h1>Cihaz Durumu Sorgulama</h1>
+            <p>Lütfen servis takip numaranızı ve seri numaranızı giriniz.</p>
             
-            <!-- Giriş Ekranı -->
-            <div id="giris-ekrani" class="sorgu-kutusu">
-                <h2>Personel Girişi</h2>
-                <div class="arama-formu" style="display: flex; flex-direction: column; gap: 10px; max-width: 320px; margin: 15px auto 0 auto;">
-                    <input type="email" id="giris-kullanici" placeholder="E-Posta Adresi" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-                    <input type="password" id="giris-sifre" placeholder="Şifre" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-                    <button class="btn-sorgula" onclick="sistemeGirisYap()">Giriş Yap</button>
-                </div>
+            <div class="form-grup">
+                <input type="text" id="sorgu-no" placeholder="Servis Takip No (Örn: DES-1001)">
             </div>
+            <div class="form-grup">
+                <input type="text" id="sorgu-sn" placeholder="Seri No (SN)">
+            </div>
+            
+            <button class="btn-primary" onclick="cihazSorgula()">Sorgula</button>
 
-            <!-- Panel İçeriği (Giriş Yapılınca Açılır) -->
-            <div id="panel-icerigi" style="display: none;">
-                <div class="panel-header" style="margin-bottom: 20px;">
+            <!-- SORGULAMA SONUCU -->
+            <div id="sorgu-sonuc" class="sonuc-kutu" style="display: none;">
+                <h3>Cihaz Bilgileri</h3>
+                <p><strong>Müşteri:</strong> <span id="sonuc-musteri">-</span></p>
+                <p><strong>Cihaz / Model:</strong> <span id="sonuc-cihaz">-</span></p>
+                <p><strong>Seri No:</strong> <span id="sonuc-sn">-</span></p>
+                <p><strong>Durum:</strong> <span id="sonuc-durum" class="durum-rozet">-</span></p>
+                <p><strong>Açıklama:</strong> <span id="sonuc-aciklama">-</span></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SAYFA 2: YÖNETİCİ PANELİ -->
+    <section id="panel-sayfasi" class="sayfa-alani">
+        
+        <!-- YÖNETİCİ GİRİŞ EKRANI -->
+        <div id="giris-ekrani" class="giris-kutu">
+            <h2>Yönetici Girişi</h2>
+            <div class="form-grup">
+                <input type="email" id="giris-kullanici" placeholder="E-posta Adresi">
+            </div>
+            <div class="form-grup">
+                <input type="password" id="giris-sifre" placeholder="Şifre">
+            </div>
+            <button class="btn-primary" onclick="sistemeGirisYap()">Giriş Yap</button>
+        </div>
+
+        <!-- YÖNETİCİ PANEL İÇERİĞİ -->
+        <div id="panel-icerigi" style="display: none;">
+            <div class="panel-header">
+                <h2>Servis Kayıt Yönetimi</h2>
+                <div class="kullanici-bilgi">
                     <span id="aktif-rol-bilgisi" class="rol-rozet">Giriş Yapıldı</span>
-                    <button class="btn-cikis" onclick="cikisYap()">Çıkış Yap</button>
+                    <button class="btn-danger" onclick="sistemdenCikisYap()">Çıkış Yap</button>
                 </div>
-
-                <!-- YÖNETİCİ İÇ SEKMELERİ -->
-                <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
-                    <button class="alt-sekme-btn active" id="btn-sub-cihaz" onclick="yoneticiSekmeDegistir('cihaz-yonetimi')">🛠️ Cihaz Takibi</button>
-                    <button class="alt-sekme-btn" id="btn-sub-stok" onclick="yoneticiSekmeDegistir('stok-yonetimi')">📦 Stok & Yedek Parça</button>
-                </div>
-
-                <!-- 1. ALT SEKME: CİHAZ YÖNETİMİ -->
-                <div id="cihaz-yonetimi" class="yonetici-sub-sekme">
-                    <!-- İstatistik Kartları -->
-                    <div class="istatistik-kapsayici">
-                        <div class="kart kart-toplam">
-                            <h3>Toplam Cihaz</h3>
-                            <p id="toplam-sayi">0</p>
-                        </div>
-                        <div class="kart kart-bekleyen">
-                            <h3>Bekleyen</h3>
-                            <p id="bekleyen-sayi">0</p>
-                        </div>
-                        <div class="kart kart-islemde">
-                            <h3>İşlemde</h3>
-                            <p id="islemde-sayi">0</p>
-                        </div>
-                        <div class="kart kart-tamamlanan">
-                            <h3>Tamamlanan</h3>
-                            <p id="tamamlanan-sayi">0</p>
-                        </div>
-                    </div>
-
-                    <!-- Yeni Cihaz Kayıt Formu -->
-                    <div class="form-kapsayici">
-                        <h2>Yeni Cihaz Kaydı</h2>
-                        <form id="cihaz-formu" style="margin-top: 15px;">
-                            <div class="form-satir">
-                                <input type="text" id="musteri-adi" placeholder="Firma / Müşteri Adı" required>
-                                <input type="text" id="telefon" placeholder="Telefon / İletişim" required>
-                                <select id="gelis-tipi" onchange="kargoAlanlariniYonet()">
-                                    <option value="Elden Teslim">Elden Teslim</option>
-                                    <option value="Kargo">Kargo</option>
-                                </select>
-                            </div>
-
-                            <div id="kargo-detay-alani" class="form-satir" style="display: none;">
-                                <input type="text" id="kargo-firmasi" placeholder="Kargo Firması">
-                                <input type="text" id="kargo-kodu" placeholder="Kargo Takip / Gönderi Kodu">
-                            </div>
-
-                            <div class="form-satir">
-                                <select id="cihaz-tipi" required>
-                                    <option value="">-- Cihaz Tipi Seçin --</option>
-                                    <option value="El Terminali">El Terminali</option>
-                                    <option value="Barkod Okuyucu">Barkod Okuyucu</option>
-                                    <option value="Barkod Yazıcı">Barkod Yazıcı</option>
-                                    <option value="Tablet / PC">Tablet / PC</option>
-                                    <option value="Diğer">Diğer</option>
-                                </select>
-                                <input type="text" id="marka" placeholder="Marka / Model (Örn: Zebra TC21, TSC RE310)" required>
-                                <input type="text" id="seri-no" placeholder="Seri No (S/N)" required>
-                            </div>
-
-                            <div class="form-satir">
-                                <input type="text" id="ariza" placeholder="Arıza / Şikayet Detayı" required>
-                            </div>
-
-                            <div class="form-satir aksesuar-alani">
-                                <strong>Yanında Gelenler:</strong>
-                                <label><input type="checkbox" class="aksesuar-cb" value="Adaptör"> Adaptör</label>
-                                <label><input type="checkbox" class="aksesuar-cb" value="Kablo"> Kablo</label>
-                                <label><input type="checkbox" class="aksesuar-cb" value="Batarya"> Batarya</label>
-                                <label><input type="checkbox" class="aksesuar-cb" value="Dock"> Dock</label>
-                            </div>
-
-                            <button type="submit" class="btn-kaydet" style="margin-top: 15px;">Cihazı Kaydet</button>
-                        </form>
-                    </div>
-
-                    <!-- Cihaz Listesi Tablosu -->
-                    <div class="liste-kapsayici">
-                        <div class="panel-header">
-                            <h2>Servisteki Cihazlar</h2>
-                            <input type="text" id="tablo-arama" onkeyup="tablodaAra()" placeholder="🔍 Seri No / Firma Ara..." style="padding: 8px 12px; border: 1px solid #ced4da; border-radius: 5px;">
-                        </div>
-                        
-                        <div class="tablo-sarmal">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Giriş Tarihi</th>
-                                        <th>Çıkış Tarihi</th>
-                                        <th>Geliş Tipi</th>
-                                        <th>Firma / Müşteri</th>
-                                        <th>Cihaz & Model</th>
-                                        <th>Seri No (S/N)</th>
-                                        <th>Aksesuarlar</th>
-                                        <th>Arıza</th>
-                                        <th>Durum</th>
-                                        <th>İşlem</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="cihaz-listesi">
-                                    <!-- JS Dinamik Dolduracak -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. ALT SEKME: STOK YÖNETİMİ -->
-                <div id="stok-yonetimi" class="yonetici-sub-sekme" style="display: none;">
-                    <div class="form-kapsayici">
-                        <h2>Yeni Parça Ekle</h2>
-                        <form id="stok-formu" style="margin-top: 15px;">
-                            <div class="form-satir">
-                                <input type="text" id="stok-adi" placeholder="Parça / Ürün Adı (Örn: TC21 Dokunmatik Ekran)" required>
-                                <input type="text" id="stok-uyumluluk" placeholder="Uyumlu Cihaz / Model" required>
-                                <input type="number" id="stok-adet" placeholder="Mevcut Adet" min="0" required>
-                                <input type="number" id="stok-kritik" placeholder="Kritik Limit" min="1" value="2" required>
-                                <input type="text" id="stok-fiyat" placeholder="Birim Fiyat ($/₺)" required>
-                            </div>
-                            <button type="submit" class="btn-kaydet" style="margin-top: 10px; background-color: #28a745;">Stok Ekle</button>
-                        </form>
-                    </div>
-
-                    <div class="liste-kapsayici" style="margin-top: 20px;">
-                        <div class="panel-header">
-                            <h2>Stok Parça Listesi</h2>
-                            <input type="text" id="stok-arama" onkeyup="stokAramaYap()" placeholder="🔍 Parça Adı / Uyumlu Model Ara..." style="padding: 8px 12px; border: 1px solid #ced4da; border-radius: 5px; width: 260px;">
-                        </div>
-
-                        <div class="tablo-sarmal">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Parça / Ürün Adı</th>
-                                        <th>Uyumlu Model</th>
-                                        <th>Mevcut Stok</th>
-                                        <th>Kritik Limit</th>
-                                        <th>Birim Fiyat</th>
-                                        <th>Durum</th>
-                                        <th>İşlem</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="stok-listesi">
-                                    <!-- JS Dinamik Dolduracak -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
             </div>
-        </section>
-    </main>
 
-    <!-- MOBİL YAZICI ETİKET ŞABLONU -->
-    <div id="etiket-alani" class="yazdir-gizli">
-        <div class="etiket-baslik" style="display:flex; align-items:center; justify-content:center; gap:4px;">
-            <img src="logo.png" style="height:12px; width:auto;" onerror="this.style.display='none'">
-            DESNET TEKNİK SERVİS
-        </div>
-        <div class="etiket-govde">
-            <div class="etiket-sol">
-                <div class="etiket-satir-sol"><small>MÜŞTERİ:</small><br><strong id="lbl-musteri">-</strong></div>
-                <div class="etiket-satir-sol"><small>CİHAZ:</small><br><span id="lbl-cihaz">-</span></div>
-                <div class="etiket-satir-sol"><small>TARİH:</small> <span id="lbl-tarih">-</span></div>
+            <!-- YENİ SERVİS KAYIT FORMU -->
+            <div class="kayit-form-kutu">
+                <h3>Yeni Servis Kaydı Oluştur</h3>
+                <form id="yeni-kayit-formu" onsubmit="yeniKayitEkle(event)">
+                    <div class="form-row">
+                        <input type="text" id="kayit-musteri" placeholder="Müşteri Adı / Firma" required>
+                        <input type="text" id="kayit-cihaz" placeholder="Cihaz Adı / Model" required>
+                        <input type="text" id="kayit-sn" placeholder="Seri No (SN)" required>
+                    </div>
+                    <div class="form-row">
+                        <select id="kayit-durum">
+                            <option value="İşlem Bekliyor">İşlem Bekliyor</option>
+                            <option value="Onarımda">Onarımda</option>
+                            <option value="Parça Bekliyor">Parça Bekliyor</option>
+                            <option value="Tamamlandı">Tamamlandı</option>
+                            <option value="Iptal Edildi">İptal Edildi</option>
+                        </select>
+                        <input type="text" id="kayit-aciklama" placeholder="Servis Açıklaması / Arıza Detayı">
+                    </div>
+                    <button type="submit" class="btn-success">Kaydı Kaydet</button>
+                </form>
             </div>
-            <div class="etiket-sag">
-                <div id="lbl-qrcode"></div>
-                <div class="etiket-seri">SN: <span id="lbl-serino">-</span></div>
+
+            <!-- KAYITLI SERVİS LİSTESİ -->
+            <div class="liste-kutu">
+                <h3>Servisteki Cihazlar</h3>
+                <table class="veri-tablosu">
+                    <thead>
+                        <tr>
+                            <th>Takip No</th>
+                            <th>Müşteri</th>
+                            <th>Cihaz</th>
+                            <th>Seri No</th>
+                            <th>Durum</th>
+                            <th>Açıklama</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="servis-listesi-body">
+                        <!-- JavaScript ile dinamik dolacak -->
+                    </tbody>
+                </table>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- JS Dosyası -->
-    <script src="script.js?v=2"></script>
+    <!-- JS Dosyası (Sürüm v=3 ile önbellek kırıldı) -->
+    <script src="script.js?v=3"></script>
 </body>
 </html>
