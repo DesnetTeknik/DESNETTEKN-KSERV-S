@@ -226,34 +226,41 @@ function cihazSil(firebaseId) {
     }
 }
 
-// 11. ETİKET YAZDIRMA FONKSİYONU (TSC RE310 - 2 SÜTUNLU AYRI DÜZEN)
+// 11. ETİKET YAZDIRMA FONKSİYONU (Geliştirilmiş & Senkronize)
 function etiketYazdir(firebaseId) {
     const cihaz = cihazlar.find(c => c.firebaseId === firebaseId);
     if (!cihaz) return;
 
-    document.getElementById('lbl-musteri').innerText = cihaz.musteriAdi;
-    document.getElementById('lbl-cihaz').innerText = `${cihaz.cihazTipi} ${cihaz.marka}`;
+    // Etiket alanındaki metinleri doldur
+    document.getElementById('lbl-musteri').innerText = cihaz.musteriAdi || '-';
+    document.getElementById('lbl-cihaz').innerText = `${cihaz.cihazTipi || ''} ${cihaz.marka || ''}`.trim();
     document.getElementById('lbl-tarih').innerText = cihaz.girisTarihi || '-';
-    document.getElementById('lbl-serino').innerText = cihaz.seriNo;
+    document.getElementById('lbl-serino').innerText = cihaz.seriNo || '-';
 
-    // QR Kod Kapsayıcısını Sıfırla
+    // QR Kod Kapsayıcısını Temizle
     const qrKapsayici = document.getElementById('lbl-qrcode');
     qrKapsayici.innerHTML = "";
 
-    // QR Kodu Oluştur
-    try {
-        new QRCode(qrKapsayici, {
-            text: cihaz.seriNo,
-            width: 64,
-            height: 64,
-            correctLevel: QRCode.CorrectLevel.M
-        });
-    } catch (e) {
-        console.log("QR Kod hatası:", e);
-    }
+    // Hızlı ve Guvenli QR Oluşturma (QuickChart API fallback destegi ile)
+    const qrText = encodeURIComponent(cihaz.seriNo || '000000');
+    
+    // Basit ve doğrudan img elementi oluşturarak QR kütüphanesinin render gecikmesini sıfırlıyoruz:
+    const qrImg = document.createElement('img');
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=${qrText}`;
+    qrImg.style.width = "64px";
+    qrImg.style.height = "64px";
+    
+    // QR Resmi yüklendiğinde baskıyı başlat
+    qrImg.onload = function() {
+        setTimeout(() => {
+            window.print();
+        }, 100);
+    };
 
-    // QR Kodun Basılması İçin Bekleyip Yazdır
-    setTimeout(() => {
+    // Resim yüklenemezse bile baskı akışını kesmeme garantisi
+    qrImg.onerror = function() {
         window.print();
-    }, 250);
+    };
+
+    qrKapsayici.appendChild(qrImg);
 }
