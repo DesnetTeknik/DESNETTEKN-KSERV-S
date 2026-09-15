@@ -23,8 +23,8 @@
             <h1 style="margin: 0;">Teknik Servis Takip Sistemi</h1>
         </div>
         <nav>
-            <button class="sekme-btn active" onclick="sekmeDegistir('musteri-paneli')">Müşteri Sorgulama</button>
-            <button class="sekme-btn" onclick="sekmeDegistir('yonetici-paneli')">Yönetici Paneli</button>
+            <button class="sekme-btn active" onclick="anaSekmeDegistir('musteri-paneli')">Müşteri Sorgulama</button>
+            <button class="sekme-btn" onclick="anaSekmeDegistir('yonetici-paneli')">Yönetici Paneli</button>
         </nav>
     </header>
 
@@ -57,140 +57,157 @@
 
             <!-- Panel İçeriği (Giriş Yapılınca Açılır) -->
             <div id="panel-icerigi" style="display: none;">
-                <div class="panel-header">
+                <div class="panel-header" style="margin-bottom: 20px;">
                     <span id="aktif-rol-bilgisi" class="rol-rozet">Giriş Yapıldı</span>
                     <button class="btn-cikis" onclick="cikisYap()">Çıkış Yap</button>
                 </div>
 
-                <!-- İstatistik Kartları -->
-                <div class="istatistik-kapsayici">
-                    <div class="kart kart-toplam">
-                        <h3>Toplam Cihaz</h3>
-                        <p id="toplam-sayi">0</p>
+                <!-- YÖNETİCİ İÇ SEKMELERİ -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
+                    <button class="alt-sekme-btn active" id="btn-sub-cihaz" onclick="yoneticiSekmeDegistir('cihaz-yonetimi')">🛠️ Cihaz Takibi</button>
+                    <button class="alt-sekme-btn" id="btn-sub-stok" onclick="yoneticiSekmeDegistir('stok-yonetimi')">📦 Stok & Yedek Parça</button>
+                </div>
+
+                <!-- 1. ALT SEKME: CİHAZ YÖNETİMİ -->
+                <div id="cihaz-yonetimi" class="yonetici-sub-sekme active">
+                    <!-- İstatistik Kartları -->
+                    <div class="istatistik-kapsayici">
+                        <div class="kart kart-toplam">
+                            <h3>Toplam Cihaz</h3>
+                            <p id="toplam-sayi">0</p>
+                        </div>
+                        <div class="kart kart-bekleyen">
+                            <h3>Bekleyen</h3>
+                            <p id="bekleyen-sayi">0</p>
+                        </div>
+                        <div class="kart kart-islemde">
+                            <h3>İşlemde</h3>
+                            <p id="islemde-sayi">0</p>
+                        </div>
+                        <div class="kart kart-tamamlanan">
+                            <h3>Tamamlanan</h3>
+                            <p id="tamamlanan-sayi">0</p>
+                        </div>
                     </div>
-                    <div class="kart kart-bekleyen">
-                        <h3>Bekleyen</h3>
-                        <p id="bekleyen-sayi">0</p>
+
+                    <!-- Yeni Cihaz Kayıt Formu -->
+                    <div class="form-kapsayici">
+                        <h2>Yeni Cihaz Kaydı</h2>
+                        <form id="cihaz-formu" style="margin-top: 15px;">
+                            <div class="form-satir">
+                                <input type="text" id="musteri-adi" placeholder="Firma / Müşteri Adı" required>
+                                <input type="text" id="telefon" placeholder="Telefon / İletişim" required>
+                                <select id="gelis-tipi" onchange="kargoAlanlariniYonet()">
+                                    <option value="Elden Teslim">Elden Teslim</option>
+                                    <option value="Kargo">Kargo</option>
+                                </select>
+                            </div>
+
+                            <div id="kargo-detay-alani" class="form-satir" style="display: none;">
+                                <input type="text" id="kargo-firmasi" placeholder="Kargo Firması">
+                                <input type="text" id="kargo-kodu" placeholder="Kargo Takip / Gönderi Kodu">
+                            </div>
+
+                            <div class="form-satir">
+                                <select id="cihaz-tipi" required>
+                                    <option value="">-- Cihaz Tipi Seçin --</option>
+                                    <option value="El Terminali">El Terminali</option>
+                                    <option value="Barkod Okuyucu">Barkod Okuyucu</option>
+                                    <option value="Barkod Yazıcı">Barkod Yazıcı</option>
+                                    <option value="Tablet / PC">Tablet / PC</option>
+                                    <option value="Diğer">Diğer</option>
+                                </select>
+                                <input type="text" id="marka" placeholder="Marka / Model (Örn: Zebra TC21, TSC RE310)" required>
+                                <input type="text" id="seri-no" placeholder="Seri No (S/N)" required>
+                            </div>
+
+                            <div class="form-satir">
+                                <input type="text" id="ariza" placeholder="Arıza / Şikayet Detayı" required>
+                            </div>
+
+                            <div class="form-satir aksesuar-alani">
+                                <strong>Yanında Gelenler:</strong>
+                                <label><input type="checkbox" class="aksesuar-cb" value="Adaptör"> Adaptör</label>
+                                <label><input type="checkbox" class="aksesuar-cb" value="Kablo"> Kablo</label>
+                                <label><input type="checkbox" class="aksesuar-cb" value="Batarya"> Batarya</label>
+                                <label><input type="checkbox" class="aksesuar-cb" value="Dock"> Dock</label>
+                            </div>
+
+                            <button type="submit" class="btn-kaydet" style="margin-top: 15px;">Cihazı Kaydet</button>
+                        </form>
                     </div>
-                    <div class="kart kart-islemde">
-                        <h3>İşlemde</h3>
-                        <p id="islemde-sayi">0</p>
-                    </div>
-                    <div class="kart kart-tamamlanan">
-                        <h3>Tamamlanan</h3>
-                        <p id="tamamlanan-sayi">0</p>
+
+                    <!-- Cihaz Listesi Tablosu -->
+                    <div class="liste-kapsayici">
+                        <div class="panel-header">
+                            <h2>Servisteki Cihazlar</h2>
+                            <input type="text" id="tablo-arama" onkeyup="tablodaAra()" placeholder="🔍 Seri No / Firma Ara..." style="padding: 8px 12px; border: 1px solid #ced4da; border-radius: 5px;">
+                        </div>
+                        
+                        <div class="tablo-sarmal">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Giriş Tarihi</th>
+                                        <th>Çıkış Tarihi</th>
+                                        <th>Geliş Tipi</th>
+                                        <th>Firma / Müşteri</th>
+                                        <th>Cihaz & Model</th>
+                                        <th>Seri No (S/N)</th>
+                                        <th>Aksesuarlar</th>
+                                        <th>Arıza</th>
+                                        <th>Durum</th>
+                                        <th>İşlem</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cihaz-listesi">
+                                    <!-- JS Dinamik Dolduracak -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Yeni Cihaz Kayıt Formu -->
-                <div class="form-kapsayici">
-                    <h2>Yeni Cihaz Kaydı</h2>
-                    <form id="cihaz-formu" style="margin-top: 15px;">
-                        <div class="form-satir">
-                            <input type="text" id="musteri-adi" placeholder="Firma / Müşteri Adı" required>
-                            <input type="text" id="telefon" placeholder="Telefon / İletişim" required>
-                            <select id="gelis-tipi" onchange="kargoAlanlariniYonet()">
-                                <option value="Elden Teslim">Elden Teslim</option>
-                                <option value="Kargo">Kargo</option>
-                            </select>
-                        </div>
-
-                        <div id="kargo-detay-alani" class="form-satir" style="display: none;">
-                            <input type="text" id="kargo-firmasi" placeholder="Kargo Firması">
-                            <input type="text" id="kargo-kodu" placeholder="Kargo Takip / Gönderi Kodu">
-                        </div>
-
-                        <div class="form-satir">
-                            <select id="cihaz-tipi" required>
-                                <option value="">-- Cihaz Tipi Seçin --</option>
-                                <option value="El Terminali">El Terminali</option>
-                                <option value="Barkod Okuyucu">Barkod Okuyucu</option>
-                                <option value="Barkod Yazıcı">Barkod Yazıcı</option>
-                                <option value="Tablet / PC">Tablet / PC</option>
-                                <option value="Diğer">Diğer</option>
-                            </select>
-                            <input type="text" id="marka" placeholder="Marka / Model (Örn: Zebra TC21, TSC RE310)" required>
-                            <input type="text" id="seri-no" placeholder="Seri No (S/N)" required>
-                        </div>
-
-                        <div class="form-satir">
-                            <input type="text" id="ariza" placeholder="Arıza / Şikayet Detayı" required>
-                        </div>
-
-                        <div class="form-satir aksesuar-alani">
-                            <strong>Yanında Gelenler:</strong>
-                            <label><input type="checkbox" class="aksesuar-cb" value="Adaptör"> Adaptör</label>
-                            <label><input type="checkbox" class="aksesuar-cb" value="Kablo"> Kablo</label>
-                            <label><input type="checkbox" class="aksesuar-cb" value="Batarya"> Batarya</label>
-                            <label><input type="checkbox" class="aksesuar-cb" value="Dock"> Dock</label>
-                        </div>
-
-                        <button type="submit" class="btn-kaydet" style="margin-top: 15px;">Cihazı Kaydet</button>
-                    </form>
-                </div>
-
-                <!-- Cihaz Listesi Tablosu -->
-                <div class="liste-kapsayici">
-                    <div class="panel-header">
-                        <h2>Servisteki Cihazlar</h2>
-                        <input type="text" id="tablo-arama" onkeyup="tablodaAra()" placeholder="🔍 Seri No / Barkod Okut..." style="padding: 8px 12px; border: 1px solid #ced4da; border-radius: 5px;">
+                <!-- 2. ALT SEKME: STOK YÖNETİMİ -->
+                <div id="stok-yonetimi" class="yonetici-sub-sekme" style="display: none;">
+                    <div class="form-kapsayici">
+                        <h2>Yeni Parça Ekle</h2>
+                        <form id="stok-formu" style="margin-top: 15px;">
+                            <div class="form-satir">
+                                <input type="text" id="stok-adi" placeholder="Parça / Ürün Adı (Örn: TC21 Dokunmatik Ekran)" required>
+                                <input type="text" id="stok-uyumluluk" placeholder="Uyumlu Cihaz / Model" required>
+                                <input type="number" id="stok-adet" placeholder="Mevcut Adet" min="0" required>
+                                <input type="number" id="stok-kritik" placeholder="Kritik Limit" min="1" value="2" required>
+                                <input type="text" id="stok-fiyat" placeholder="Birim Fiyat ($/₺)" required>
+                            </div>
+                            <button type="submit" class="btn-kaydet" style="margin-top: 10px; background-color: #28a745;">Stok Ekle</button>
+                        </form>
                     </div>
-                    
-                    <div class="tablo-sarmal">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Giriş Tarihi</th>
-                                    <th>Çıkış Tarihi</th>
-                                    <th>Geliş Tipi</th>
-                                    <th>Firma / Müşteri</th>
-                                    <th>Cihaz & Model</th>
-                                    <th>Seri No (S/N)</th>
-                                    <th>Aksesuarlar</th>
-                                    <th>Arıza</th>
-                                    <th>Durum</th>
-                                    <th>İşlem</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cihaz-listesi">
-                                <!-- JS Dinamik Dolduracak -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
 
-                <!-- STOK TAKİP SİSTEMİ BÖLÜMÜ -->
-                <div class="form-kapsayici" style="margin-top: 30px;">
-                    <h2>📦 Yedek Parça & Stok Takip Sistemi</h2>
-                    
-                    <form id="stok-formu" style="margin-top: 15px;">
-                        <div class="form-satir">
-                            <input type="text" id="stok-adi" placeholder="Parça / Ürün Adı (Örn: TC21 Dokunmatik Ekran)" required>
-                            <input type="text" id="stok-uyumluluk" placeholder="Uyumlu Cihaz / Model" required>
-                            <input type="number" id="stok-adet" placeholder="Mevcut Adet" min="0" required>
-                            <input type="number" id="stok-kritik" placeholder="Kritik Limit" min="1" value="2" required>
-                            <input type="text" id="stok-fiyat" placeholder="Birim Fiyat ($/₺)" required>
+                    <div class="liste-kapsayici" style="margin-top: 20px;">
+                        <div class="panel-header">
+                            <h2>Stok Parça Listesi</h2>
+                            <input type="text" id="stok-arama" onkeyup="stokAramaYap()" placeholder="🔍 Parça Adı / Uyumlu Model Ara..." style="padding: 8px 12px; border: 1px solid #ced4da; border-radius: 5px; width: 260px;">
                         </div>
-                        <button type="submit" class="btn-kaydet" style="margin-top: 10px; background-color: #28a745;">Stok Ekle</button>
-                    </form>
 
-                    <div class="tablo-sarmal" style="margin-top: 20px;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Parça / Ürün Adı</th>
-                                    <th>Uyumlu Model</th>
-                                    <th>Mevcut Stok</th>
-                                    <th>Kritik Limit</th>
-                                    <th>Birim Fiyat</th>
-                                    <th>Durum</th>
-                                    <th>İşlem</th>
-                                </tr>
-                            </thead>
-                            <tbody id="stok-listesi">
-                                <!-- JS Dinamik Dolduracak -->
-                            </tbody>
-                        </table>
+                        <div class="tablo-sarmal">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Parça / Ürün Adı</th>
+                                        <th>Uyumlu Model</th>
+                                        <th>Mevcut Stok</th>
+                                        <th>Kritik Limit</th>
+                                        <th>Birim Fiyat</th>
+                                        <th>Durum</th>
+                                        <th>İşlem</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stok-listesi">
+                                    <!-- JS Dinamik Dolduracak -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -198,7 +215,7 @@
         </section>
     </main>
 
-    <!-- MOBİL YAZICI ETİKET ŞABLONU (50mm x 30mm - 2 SÜTUNLU YAPI) -->
+    <!-- MOBİL YAZICI ETİKET ŞABLONU -->
     <div id="etiket-alani" class="yazdir-gizli">
         <div class="etiket-baslik" style="display:flex; align-items:center; justify-content:center; gap:4px;">
             <img src="logo.png" style="height:12px; width:auto;" onerror="this.style.display='none'">
