@@ -23,11 +23,6 @@ const KULLANICILAR = [
 
 let aktifKullanici = null;
 
-const cihazFormu = document.getElementById('cihaz-formu');
-const stokFormu = document.getElementById('stok-formu');
-const cihazListesi = document.getElementById('cihaz-listesi');
-const stokListesi = document.getElementById('stok-listesi');
-
 let cihazlar = [];
 let stoklar = [];
 
@@ -36,24 +31,31 @@ function anaSekmeDegistir(sekmeId) {
     document.querySelectorAll('.sekme-icerik').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('nav .sekme-btn').forEach(el => el.classList.remove('active'));
     
-    document.getElementById(sekmeId).classList.add('active');
+    const hedef = document.getElementById(sekmeId);
+    if(hedef) hedef.classList.add('active');
     
     const butonlar = document.querySelectorAll('nav .sekme-btn');
-    if(sekmeId === 'musteri-paneli') butonlar[0].classList.add('active');
-    if(sekmeId === 'yonetici-paneli') butonlar[1].classList.add('active');
+    if(sekmeId === 'musteri-paneli' && butonlar[0]) butonlar[0].classList.add('active');
+    if(sekmeId === 'yonetici-paneli' && butonlar[1]) butonlar[1].classList.add('active');
 }
 
 // 2. YÖNETİCİ ALT SEKME DEĞİŞTİRME
 function yoneticiSekmeDegistir(subSekmeId) {
-    document.querySelectorAll('.yonetici-sub-sekme').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('.alt-sekme-btn').forEach(el => el.classList.remove('active'));
-
-    document.getElementById(subSekmeId).style.display = 'block';
+    const cihazSekme = document.getElementById('cihaz-yonetimi');
+    const stokSekme = document.getElementById('stok-yonetimi');
+    const btnCihaz = document.getElementById('btn-sub-cihaz');
+    const btnStok = document.getElementById('btn-sub-stok');
 
     if (subSekmeId === 'cihaz-yonetimi') {
-        document.getElementById('btn-sub-cihaz').classList.add('active');
-    } else {
-        document.getElementById('btn-sub-stok').classList.add('active');
+        if(cihazSekme) cihazSekme.style.display = 'block';
+        if(stokSekme) stokSekme.style.display = 'none';
+        if(btnCihaz) btnCihaz.classList.add('active');
+        if(btnStok) btnStok.classList.remove('active');
+    } else if (subSekmeId === 'stok-yonetimi') {
+        if(cihazSekme) cihazSekme.style.display = 'none';
+        if(stokSekme) stokSekme.style.display = 'block';
+        if(btnCihaz) btnCihaz.classList.remove('active');
+        if(btnStok) btnStok.classList.add('active');
     }
 }
 
@@ -76,6 +78,9 @@ function sistemeGirisYap() {
         
         document.getElementById('giris-kullanici').value = "";
         document.getElementById('giris-sifre').value = "";
+        
+        // İlk açılışta Cihaz Takibini göster
+        yoneticiSekmeDegistir('cihaz-yonetimi');
         
         listeyiGuncelle(cihazlar);
         stokListesiniGuncelle(stoklar);
@@ -112,74 +117,80 @@ db.collection("stoklar").onSnapshot((snapshot) => {
 function kargoAlanlariniYonet() {
     const gelisTipi = document.getElementById('gelis-tipi').value;
     const kargoAlani = document.getElementById('kargo-detay-alani');
-    kargoAlani.style.display = (gelisTipi === 'Kargo') ? 'flex' : 'none';
+    if (kargoAlani) {
+        kargoAlani.style.display = (gelisTipi === 'Kargo') ? 'flex' : 'none';
+    }
 }
 
 // 7. CİHAZ KAYDETME
-if (cihazFormu) {
-    cihazFormu.addEventListener('submit', function(e) {
-        e.preventDefault();
+document.addEventListener('DOMContentLoaded', () => {
+    const cihazFormu = document.getElementById('cihaz-formu');
+    if (cihazFormu) {
+        cihazFormu.addEventListener('submit', function(e) {
+            e.preventDefault();
 
-        const secilenAksesuarlar = [];
-        document.querySelectorAll('.aksesuar-cb:checked').forEach(cb => {
-            secilenAksesuarlar.push(cb.value);
+            const secilenAksesuarlar = [];
+            document.querySelectorAll('.aksesuar-cb:checked').forEach(cb => {
+                secilenAksesuarlar.push(cb.value);
+            });
+
+            const yeniCihaz = {
+                id: Date.now(),
+                musteriAdi: document.getElementById('musteri-adi').value,
+                telefon: document.getElementById('telefon').value,
+                cihazTipi: document.getElementById('cihaz-tipi').value,
+                marka: document.getElementById('marka').value,
+                seriNo: document.getElementById('seri-no').value,
+                ariza: document.getElementById('ariza').value,
+                gelisTipi: document.getElementById('gelis-tipi').value,
+                kargoFirmasi: document.getElementById('kargo-firmasi').value || '-',
+                kargoKodu: document.getElementById('kargo-kodu').value || '-',
+                aksesuarlar: secilenAksesuarlar.join(', ') || 'Yok',
+                durum: 'Bekliyor',
+                girisTarihi: new Date().toLocaleDateString('tr-TR'),
+                cikisTarihi: '-',
+                kaydeden: aktifKullanici ? aktifKullanici.kadi : 'Bilinmiyor'
+            };
+
+            db.collection("cihazlar").add(yeniCihaz).then(() => {
+                alert('✅ Cihaz kaydı buluta eklendi!');
+                cihazFormu.reset();
+                kargoAlanlariniYonet();
+            }).catch((err) => {
+                alert('❌ Hata: ' + err.message);
+            });
         });
+    }
 
-        const yeniCihaz = {
-            id: Date.now(),
-            musteriAdi: document.getElementById('musteri-adi').value,
-            telefon: document.getElementById('telefon').value,
-            cihazTipi: document.getElementById('cihaz-tipi').value,
-            marka: document.getElementById('marka').value,
-            seriNo: document.getElementById('seri-no').value,
-            ariza: document.getElementById('ariza').value,
-            gelisTipi: document.getElementById('gelis-tipi').value,
-            kargoFirmasi: document.getElementById('kargo-firmasi').value || '-',
-            kargoKodu: document.getElementById('kargo-kodu').value || '-',
-            aksesuarlar: secilenAksesuarlar.join(', ') || 'Yok',
-            durum: 'Bekliyor',
-            girisTarihi: new Date().toLocaleDateString('tr-TR'),
-            cikisTarihi: '-',
-            kaydeden: aktifKullanici ? aktifKullanici.kadi : 'Bilinmiyor'
-        };
+    // 8. STOK KAYDETME FONKSİYONU
+    const stokFormu = document.getElementById('stok-formu');
+    if (stokFormu) {
+        stokFormu.addEventListener('submit', function(e) {
+            e.preventDefault();
 
-        db.collection("cihazlar").add(yeniCihaz).then(() => {
-            alert('✅ Cihaz kaydı buluta eklendi!');
-            cihazFormu.reset();
-            kargoAlanlariniYonet();
-        }).catch((err) => {
-            alert('❌ Hata: ' + err.message);
+            if (!aktifKullanici || !aktifKullanici.silmeYetkisi) {
+                alert("❌ Stok ekleme yetkiniz bulunmamaktadır.");
+                return;
+            }
+
+            const yeniStok = {
+                stokAdi: document.getElementById('stok-adi').value,
+                uyumluluk: document.getElementById('stok-uyumluluk').value,
+                adet: parseInt(document.getElementById('stok-adet').value) || 0,
+                kritikLimit: parseInt(document.getElementById('stok-kritik').value) || 2,
+                fiyat: document.getElementById('stok-fiyat').value,
+                ekleyen: aktifKullanici.kadi
+            };
+
+            db.collection("stoklar").add(yeniStok).then(() => {
+                alert('✅ Yeni yedek parça stoğa eklendi!');
+                stokFormu.reset();
+            }).catch((err) => {
+                alert('❌ Stok ekleme hatası: ' + err.message);
+            });
         });
-    });
-}
-
-// 8. STOK KAYDETME FONKSİYONU
-if (stokFormu) {
-    stokFormu.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        if (!aktifKullanici || !aktifKullanici.silmeYetkisi) {
-            alert("❌ Stok ekleme yetkiniz bulunmamaktadır.");
-            return;
-        }
-
-        const yeniStok = {
-            stokAdi: document.getElementById('stok-adi').value,
-            uyumluluk: document.getElementById('stok-uyumluluk').value,
-            adet: parseInt(document.getElementById('stok-adet').value) || 0,
-            kritikLimit: parseInt(document.getElementById('stok-kritik').value) || 2,
-            fiyat: document.getElementById('stok-fiyat').value,
-            ekleyen: aktifKullanici.kadi
-        };
-
-        db.collection("stoklar").add(yeniStok).then(() => {
-            alert('✅ Yeni yedek parça stoğa eklendi!');
-            stokFormu.reset();
-        }).catch((err) => {
-            alert('❌ Stok ekleme hatası: ' + err.message);
-        });
-    });
-}
+    }
+});
 
 // 9. MÜŞTERİ SORGULAMA
 function musteriSorgula() {
@@ -240,6 +251,7 @@ function stokAramaYap() {
 
 // 12. CİHAZ LİSTESİNİ VE İSTATİSTİKLERİ GÜNCELLEME
 function listeyiGuncelle(liste) {
+    const cihazListesi = document.getElementById('cihaz-listesi');
     if (!cihazListesi) return;
     cihazListesi.innerHTML = '';
     
@@ -287,6 +299,7 @@ function listeyiGuncelle(liste) {
 
 // 13. STOK LİSTESİNİ GÜNCELLEME
 function stokListesiniGuncelle(liste) {
+    const stokListesi = document.getElementById('stok-listesi');
     if (!stokListesi) return;
     stokListesi.innerHTML = '';
 
