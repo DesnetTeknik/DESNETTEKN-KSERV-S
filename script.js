@@ -24,8 +24,12 @@ const KULLANICILAR = [
 let aktifKullanici = null;
 
 const cihazFormu = document.getElementById('cihaz-formu');
+const stokFormu = document.getElementById('stok-formu');
 const cihazListesi = document.getElementById('cihaz-listesi');
+const stokListesi = document.getElementById('stok-listesi');
+
 let cihazlar = [];
+let stoklar = [];
 
 // 1. SEKME DEĞİŞTİRME FONKSİYONU
 function sekmeDegistir(sekmeId) {
@@ -39,7 +43,7 @@ function sekmeDegistir(sekmeId) {
     if(sekmeId === 'yonetici-paneli') butonlar[1].classList.add('active');
 }
 
-// 2. SİSTEME GİRİŞ YAPMA FONKSİYONU (KULLANICI ADI & ŞİFRE KONTROLÜ)
+// 2. SİSTEME GİRİŞ YAPMA FONKSİYONU
 function sistemeGirisYap() {
     const kadiInput = document.getElementById('giris-kullanici').value.trim().toLowerCase();
     const sifreInput = document.getElementById('giris-sifre').value.trim();
@@ -60,6 +64,7 @@ function sistemeGirisYap() {
         document.getElementById('giris-sifre').value = "";
         
         listeyiGuncelle(cihazlar);
+        stokListesiniGuncelle(stoklar);
     } else {
         alert("❌ Hatalı kullanıcı adı veya şifre!");
     }
@@ -72,13 +77,21 @@ function cikisYap() {
     document.getElementById('panel-icerigi').style.display = "none";
 }
 
-// 4. BULUT VERİTABANINI DİNLEME (CANLI SENKRONİZASYON)
+// 4. BULUT VERİTABANINI DİNLEME (CİHAZLAR & STOKLAR CANLI SENKRONİZASYON)
 db.collection("cihazlar").onSnapshot((snapshot) => {
     cihazlar = [];
     snapshot.forEach((doc) => {
         cihazlar.push({ firebaseId: doc.id, ...doc.data() });
     });
     listeyiGuncelle(cihazlar);
+});
+
+db.collection("stoklar").onSnapshot((snapshot) => {
+    stoklar = [];
+    snapshot.forEach((doc) => {
+        stoklar.push({ firebaseId: doc.id, ...doc.data() });
+    });
+    stokListesiniGuncelle(stoklar);
 });
 
 // 5. KARGO ALANI YÖNETİMİ
@@ -92,7 +105,7 @@ function kargoAlanlariniYonet() {
     }
 }
 
-// 6. CİHAZ KAYDETME (BULUTA EKLEME)
+// 6. CİHAZ KAYDETME
 if (cihazFormu) {
     cihazFormu.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -130,7 +143,35 @@ if (cihazFormu) {
     });
 }
 
-// 7. MÜŞTERİ SORGULAMA FONKSİYONU
+// 7. STOK KAYDETME FONKSİYONU
+if (stokFormu) {
+    stokFormu.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (!aktifKullanici || !aktifKullanici.silmeYetkisi) {
+            alert("❌ Stok ekleme yetkiniz bulunmamaktadır.");
+            return;
+        }
+
+        const yeniStok = {
+            stokAdi: document.getElementById('stok-adi').value,
+            uyumluluk: document.getElementById('stok-uyumluluk').value,
+            adet: parseInt(document.getElementById('stok-adet').value) || 0,
+            kritikLimit: parseInt(document.getElementById('stok-kritik').value) || 2,
+            fiyat: document.getElementById('stok-fiyat').value,
+            ekleyen: aktifKullanici.kadi
+        };
+
+        db.collection("stoklar").add(yeniStok).then(() => {
+            alert('✅ Yeni yedek parça stoğa eklendi!');
+            stokFormu.reset();
+        }).catch((err) => {
+            alert('❌ Stok ekleme hatası: ' + err.message);
+        });
+    });
+}
+
+// 8. MÜŞTERİ SORGULAMA
 function musteriSorgula() {
     const aramaMetni = document.getElementById('musteri-sorgu-input').value.trim().toLowerCase();
     const sonucAlani = document.getElementById('musteri-sonuc-alani');
@@ -166,7 +207,7 @@ function musteriSorgula() {
     sonucAlani.innerHTML = html;
 }
 
-// 8. TABLODA ARAMA
+// 9. TABLODA ARAMA
 function tablodaAra() {
     const aramaMetni = document.getElementById('tablo-arama').value.toLowerCase();
     const filtrelenmis = cihazlar.filter(c => 
@@ -177,7 +218,7 @@ function tablodaAra() {
     listeyiGuncelle(filtrelenmis);
 }
 
-// 9. LİSTEYİ VE İSTATİSTİKLERİ GÜNCELLEME (KULLANICI YETKİLİ)
+// 10. LİSTEYİ VE İSTATİSTİKLERİ GÜNCELLEME
 function listeyiGuncelle(liste) {
     if (!cihazListesi) return;
     cihazListesi.innerHTML = '';
@@ -224,7 +265,58 @@ function listeyiGuncelle(liste) {
     if (document.getElementById('tamamlanan-sayi')) document.getElementById('tamamlanan-sayi').innerText = tamamlanan;
 }
 
-// 10. DURUM GÜNCELLEME VE SİLME (YETKİ KONTROLLÜ)
+// 11. STOK LİSTESİNİ GÜNCELLEME
+function stokListesiniGuncelle(liste) {
+    if (!stokListesi) return;
+    stokListesi.innerHTML = '';
+
+    liste.forEach((s) => {
+        const kritikDurum = s.adet <= s.kritikLimit;
+        const durumBadge = kritikDurum 
+            ? `<span style="background:#dc3545; color:white; padding:3px 8px; border-radius:10px; font-size:12px; font-weight:bold;">⚠️ Kritik Stok</span>` 
+            : `<span style="background:#28a745; color:white; padding:3px 8px; border-radius:10px; font-size:12px;">✅ Yeterli</span>`;
+
+        const silButonHtml = (aktifKullanici && aktifKullanici.silmeYetkisi) 
+            ? `<button onclick="stokSil('${s.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px;">Sil</button>` 
+            : '';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${s.stokAdi}</strong></td>
+            <td>${s.uyumluluk}</td>
+            <td><b style="font-size:16px;">${s.adet}</b> Adet</td>
+            <td>${s.kritikLimit}</td>
+            <td>${s.fiyat}</td>
+            <td>${durumBadge}</td>
+            <td>
+                <button onclick="stokAdetGuncelle('${s.firebaseId}', ${s.adet + 1})" style="background:#198754; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px; margin-right:2px;">+</button>
+                <button onclick="stokAdetGuncelle('${s.firebaseId}', ${s.adet - 1})" style="background:#ffc107; color:black; border:none; padding:4px 8px; cursor:pointer; border-radius:3px; margin-right:4px;">-</button>
+                ${silButonHtml}
+            </td>
+        `;
+        stokListesi.appendChild(tr);
+    });
+}
+
+// 12. STOK GÜNCELLEME VE SİLME
+function stokAdetGuncelle(firebaseId, yeniAdet) {
+    if (yeniAdet < 0) return;
+    db.collection("stoklar").doc(firebaseId).update({
+        adet: yeniAdet
+    });
+}
+
+function stokSil(firebaseId) {
+    if (!aktifKullanici || !aktifKullanici.silmeYetkisi) {
+        alert("❌ Stok silme yetkiniz yok!");
+        return;
+    }
+    if (confirm('Bu parça stoğunu silmek istediğinize emin misiniz?')) {
+        db.collection("stoklar").doc(firebaseId).delete();
+    }
+}
+
+// 13. DURUM GÜNCELLEME VE SİLME
 function durumDegistir(firebaseId, yeniDurum) {
     db.collection("cihazlar").doc(firebaseId).update({
         durum: yeniDurum,
@@ -242,7 +334,7 @@ function cihazSil(firebaseId) {
     }
 }
 
-// 11. ETİKET YAZDIRMA FONKSİYONU
+// 14. ETİKET YAZDIRMA FONKSİYONU
 function etiketYazdir(firebaseId) {
     const cihaz = cihazlar.find(c => c.firebaseId === firebaseId);
     if (!cihaz) return;
