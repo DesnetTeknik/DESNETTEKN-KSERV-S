@@ -1,79 +1,45 @@
-/* GENEL ARAYÜZ VE TEMEL AYARLAR */
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.90)), 
-                url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
-    background-size: cover;
-    color: #1e293b;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    background-color: #f4f6f9;
+    color: #333;
 }
 
-/* HEADER & LOGO BÖLÜMÜ */
 header {
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+    background-color: #1a252f;
+    color: white;
+    padding: 15px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 30px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    border-bottom: 2px solid #007bff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-header img {
-    height: 58px !important; /* Logo büyütüldü */
-    width: auto;
-    object-fit: contain;
-    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1));
-}
-
-header h1 {
-    font-size: 22px;
-    color: #0f172a;
-    font-weight: 700;
-}
-
-/* NAVIGASYON SEKMELERİ */
-nav {
-    display: flex;
-    gap: 10px;
-}
-
-.sekme-btn {
-    padding: 10px 18px;
+nav .sekme-btn {
+    background: transparent;
     border: none;
-    background-color: #e2e8f0;
-    color: #475569;
-    border-radius: 6px;
+    color: #a0aec0;
+    font-size: 16px;
+    padding: 8px 16px;
     cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease;
+    border-radius: 4px;
+    transition: all 0.3s ease;
 }
 
-.sekme-btn:hover {
-    background-color: #cbd5e1;
-}
-
-.sekme-btn.active {
-    background-color: #007bff;
+nav .sekme-btn.active, nav .sekme-btn:hover {
     color: white;
-    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+    background-color: #2c3e50;
 }
 
-/* ANA İÇERİK KAPSAYICI */
 main {
+    padding: 25px;
     max-width: 1300px;
-    width: 95%;
-    margin: 30px auto;
-    flex: 1;
+    margin: 0 auto;
 }
 
 .sekme-icerik {
@@ -84,14 +50,29 @@ main {
     display: block;
 }
 
-/* KARTLAR VE KUTULAR (CAM EFEKTİ) */
+.alt-sekme-btn {
+    background: #e2e8f0;
+    border: none;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #4a5568;
+    transition: all 0.2s;
+}
+
+.alt-sekme-btn.active {
+    background: #007bff;
+    color: white;
+}
+
 .sorgu-kutusu, .form-kapsayici, .liste-kapsayici {
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(8px);
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    margin-bottom: 25px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
 }
 
 .arama-formu {
@@ -102,207 +83,133 @@ main {
 
 .arama-formu input {
     flex: 1;
-    padding: 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 15px;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
 }
 
 .btn-sorgula, .btn-kaydet {
     background-color: #007bff;
     color: white;
     border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
-    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background 0.2s;
+    font-weight: bold;
 }
 
 .btn-sorgula:hover, .btn-kaydet:hover {
     background-color: #0056b3;
 }
 
-/* İSTATİSTİK KARTLARI */
 .istatistik-kapsayici {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 .kart {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 20px;
-    border-radius: 10px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
     text-align: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    border-top: 4px solid #007bff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border-bottom: 4px solid #ccc;
 }
 
-.kart h3 {
-    font-size: 14px;
-    color: #64748b;
-    text-transform: uppercase;
-}
+.kart-toplam { border-color: #17a2b8; }
+.kart-bekleyen { border-color: #ffc107; }
+.kart-islemde { border-color: #007bff; }
+.kart-tamamlanan { border-color: #28a745; }
 
-.kart p {
-    font-size: 28px;
-    font-weight: bold;
-    color: #0f172a;
-    margin-top: 5px;
-}
+.kart h3 { font-size: 14px; color: #6c757d; }
+.kart p { font-size: 24px; font-weight: bold; margin-top: 5px; }
 
-/* FORM DÜZENİ */
 .form-satir {
     display: flex;
     gap: 15px;
     margin-bottom: 15px;
+    flex-wrap: wrap;
 }
 
 .form-satir input, .form-satir select {
     flex: 1;
-    padding: 10px 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 14px;
+    min-width: 180px;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
 }
 
 .aksesuar-alani {
     align-items: center;
-    background: #f8fafc;
-    padding: 10px 15px;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
+    gap: 15px;
 }
 
-.aksesuar-alani label {
-    margin-left: 10px;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-/* PANEL HEADER VE BUTONLAR */
 .panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
 }
 
 .rol-rozet {
-    background: #e0e7ff;
-    color: #3730a3;
-    padding: 6px 14px;
+    background-color: #e9ecef;
+    padding: 6px 12px;
     border-radius: 20px;
-    font-weight: 600;
+    font-weight: bold;
     font-size: 13px;
 }
 
 .btn-cikis {
-    background: #ef4444;
+    background-color: #dc3545;
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 6px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    font-weight: 600;
 }
 
-.btn-cikis:hover {
-    background: #dc2626;
-}
-
-/* TABLO DÜZENİ */
 .tablo-sarmal {
     overflow-x: auto;
+    margin-top: 15px;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
-    background: white;
+    text-align: left;
 }
 
 th, td {
     padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #dee2e6;
     font-size: 14px;
 }
 
 th {
-    background-color: #f1f5f9;
-    color: #334155;
-    font-weight: 700;
+    background-color: #f8f9fa;
+    color: #495057;
 }
 
-tr:hover {
-    background-color: #f8fafc;
-}
-
-/* MOBİL ETİKET YAZDIRMA STİLLERİ (50mm x 30mm) */
-.yazdir-gizli {
-    display: none;
-}
-
+/* YAZICI/ETİKET STİLLERİ (50mm x 30mm) */
 @media print {
-    body * {
-        visibility: hidden;
-    }
-    #etiket-alani, #etiket-alani * {
-        visibility: visible;
-    }
+    body * { visibility: hidden; }
+    #etiket-alani, #etiket-alani * { visibility: visible; }
     #etiket-alani {
-        display: block !important;
         position: absolute;
-        left: 0;
-        top: 0;
-        width: 50mm;
-        height: 30mm;
-        padding: 1.5mm;
+        left: 0; top: 0;
+        width: 50mm; height: 30mm;
+        padding: 1mm 2mm;
         box-sizing: border-box;
         font-family: Arial, sans-serif;
-        background: white;
-        color: black;
-    }
-    .etiket-baslik {
-        font-size: 7pt;
-        font-weight: bold;
-        text-align: center;
-        border-bottom: 1px solid #000;
-        padding-bottom: 1px;
-        margin-bottom: 2px;
-    }
-    .etiket-govde {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .etiket-sol {
-        width: 58%;
-        font-size: 6pt;
-        line-height: 1.1;
-    }
-    .etiket-satir-sol {
-        margin-bottom: 1.5px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .etiket-sag {
-        width: 40%;
-        text-align: center;
-    }
-    #lbl-qrcode img {
-        width: 16mm !important;
-        height: 16mm !important;
-        margin: 0 auto;
-    }
-    .etiket-seri {
-        font-size: 5.5pt;
-        font-weight: bold;
-        margin-top: 1px;
     }
 }
+
+.yazdir-gizli { display: none; }
+@media print { .yazdir-gizli { display: block !important; } }
+
+.etiket-baslik { font-size: 8pt; font-weight: bold; border-bottom: 1px solid #000; text-align: center; }
+.etiket-govde { display: flex; justify-content: space-between; margin-top: 2px; }
+.etiket-sol { width: 58%; font-size: 7pt; }
+.etiket-sag { width: 40%; text-align: center; }
+.etiket-seri { font-size: 6pt; font-weight: bold; margin-top: 1px; }
