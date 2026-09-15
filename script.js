@@ -13,10 +13,15 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ŞİFRELER VE ROL YÖNETİMİ
-const PATRON_SIFRESI = "1234";
-const ELEMAN_SIFRESI = "5678";
-let aktifRol = "musteri";
+// TANIMLI KULLANICI HESAPLARI VE YETKİLERİ
+const KULLANICILAR = [
+    { kadi: "omer.ekinci", sifre: "omer1221", unvan: "Patron", silmeYetkisi: true },
+    { kadi: "muhammed.simsek", sifre: "mami7883", unvan: "Teknik Servis Yöneticisi", silmeYetkisi: true },
+    { kadi: "yigit.turker", sifre: "yigit5678", unvan: "Teknik Servis Elemanı", silmeYetkisi: false },
+    { kadi: "emin.muhasebe", sifre: "emin.1244", unvan: "Muhasebeci", silmeYetkisi: false }
+];
+
+let aktifKullanici = null;
 
 const cihazFormu = document.getElementById('cihaz-formu');
 const cihazListesi = document.getElementById('cihaz-listesi');
@@ -34,35 +39,35 @@ function sekmeDegistir(sekmeId) {
     if(sekmeId === 'yonetici-paneli') butonlar[1].classList.add('active');
 }
 
-// 2. SİSTEME GİRİŞ YAPMA FONKSİYONU
+// 2. SİSTEME GİRİŞ YAPMA FONKSİYONU (KULLANICI ADI & ŞİFRE KONTROLÜ)
 function sistemeGirisYap() {
-    const girilenSifre = document.getElementById('giris-sifre').value;
+    const kadiInput = document.getElementById('giris-kullanici').value.trim().toLowerCase();
+    const sifreInput = document.getElementById('giris-sifre').value.trim();
+    
     const girisEkrani = document.getElementById('giris-ekrani');
     const panelIcerigi = document.getElementById('panel-icerigi');
     const rolRozet = document.getElementById('aktif-rol-bilgisi');
 
-    if (girilenSifre === PATRON_SIFRESI) {
-        aktifRol = "Patron";
+    const eşleşenKullanıcı = KULLANICILAR.find(u => u.kadi.toLowerCase() === kadiInput && u.sifre === sifreInput);
+
+    if (eşleşenKullanıcı) {
+        aktifKullanici = eşleşenKullanıcı;
         girisEkrani.style.display = "none";
         panelIcerigi.style.display = "block";
-        rolRozet.innerText = "Giriş Yapıldı: PATRON (Tam Yetki)";
+        rolRozet.innerText = `Giriş Yapıldı: ${aktifKullanici.unvan} (${aktifKullanici.kadi})`;
+        
+        document.getElementById('giris-kullanici').value = "";
         document.getElementById('giris-sifre').value = "";
-    } else if (girilenSifre === ELEMAN_SIFRESI) {
-        aktifRol = "Eleman";
-        girisEkrani.style.display = "none";
-        panelIcerigi.style.display = "block";
-        rolRozet.innerText = "Giriş Yapıldı: ELEMAN (Kısıtlı Yetki)";
-        document.getElementById('giris-sifre').value = "";
+        
+        listeyiGuncelle(cihazlar);
     } else {
-        alert("❌ Hatalı şifre girdiniz!");
-        return;
+        alert("❌ Hatalı kullanıcı adı veya şifre!");
     }
-    listeyiGuncelle(cihazlar);
 }
 
 // 3. ÇIKIŞ YAPMA FONKSİYONU
 function cikisYap() {
-    aktifRol = "musteri";
+    aktifKullanici = null;
     document.getElementById('giris-ekrani').style.display = "block";
     document.getElementById('panel-icerigi').style.display = "none";
 }
@@ -111,7 +116,8 @@ if (cihazFormu) {
             aksesuarlar: secilenAksesuarlar.join(', ') || 'Yok',
             durum: 'Bekliyor',
             girisTarihi: new Date().toLocaleDateString('tr-TR'),
-            cikisTarihi: '-'
+            cikisTarihi: '-',
+            kaydeden: aktifKullanici ? aktifKullanici.kadi : 'Bilinmiyor'
         };
 
         db.collection("cihazlar").add(yeniCihaz).then(() => {
@@ -171,7 +177,7 @@ function tablodaAra() {
     listeyiGuncelle(filtrelenmis);
 }
 
-// 9. LİSTEYİ VE İSTATİSTİKLERİ GÜNCELLEME (YETKİ KONTROLLÜ)
+// 9. LİSTEYİ VE İSTATİSTİKLERİ GÜNCELLEME (KULLANICI YETKİLİ)
 function listeyiGuncelle(liste) {
     if (!cihazListesi) return;
     cihazListesi.innerHTML = '';
@@ -183,7 +189,7 @@ function listeyiGuncelle(liste) {
         if (c.durum === 'İşlemde') islemde++;
         if (c.durum === 'Tamamlandı') tamamlanan++;
 
-        const silButonHtml = (aktifRol === "Patron") 
+        const silButonHtml = (aktifKullanici && aktifKullanici.silmeYetkisi) 
             ? `<button onclick="cihazSil('${c.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px;">Sil</button>` 
             : '';
 
@@ -218,7 +224,7 @@ function listeyiGuncelle(liste) {
     if (document.getElementById('tamamlanan-sayi')) document.getElementById('tamamlanan-sayi').innerText = tamamlanan;
 }
 
-// 10. DURUM GÜNCELLEME VE SİLME (PATRON YETKİ KONTROLÜ)
+// 10. DURUM GÜNCELLEME VE SİLME (YETKİ KONTROLLÜ)
 function durumDegistir(firebaseId, yeniDurum) {
     db.collection("cihazlar").doc(firebaseId).update({
         durum: yeniDurum,
@@ -227,8 +233,8 @@ function durumDegistir(firebaseId, yeniDurum) {
 }
 
 function cihazSil(firebaseId) {
-    if (aktifRol !== "Patron") {
-        alert("❌ Bu işlem için yetkiniz yok! Yalnızca PATRON silme işlemi yapabilir.");
+    if (!aktifKullanici || !aktifKullanici.silmeYetkisi) {
+        alert("❌ Bu işlem için yetkiniz yok! Yalnızca Patron veya Teknik Servis Yöneticisi silme yapabilir.");
         return;
     }
     if (confirm('Bu kaydı bulut veritabanından silmek istediğinize emin misiniz?')) {
@@ -236,7 +242,7 @@ function cihazSil(firebaseId) {
     }
 }
 
-// 11. ETİKET YAZDIRMA FONKSİYONU (KUSURSUZ GÖRSEL VE QR HİZALAMA)
+// 11. ETİKET YAZDIRMA FONKSİYONU
 function etiketYazdir(firebaseId) {
     const cihaz = cihazlar.find(c => c.firebaseId === firebaseId);
     if (!cihaz) return;
