@@ -5,8 +5,150 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teknik Servis Takip Sistemi</title>
     
-    <!-- CSS -->
-   <link rel="stylesheet" href="style.css?v=2">
+    <!-- CSS (Doğrudan HTML İçine Gömüldü) -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .navbar {
+            background-color: #1a252f;
+            color: #fff;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+            padding: 8px 16px;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .nav-btn.active, .nav-btn:hover {
+            background-color: #3498db;
+            border-color: #3498db;
+        }
+
+        .sayfa-alani {
+            padding: 40px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .sorgu-kutu, .giris-kutu, .kayit-form-kutu, .liste-kutu {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-grup {
+            margin-bottom: 15px;
+        }
+
+        .form-grup input, .form-row input, .form-row select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-success {
+            background-color: #2ecc71;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-danger-sm {
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .durum-rozet {
+            background: #e1f5fe;
+            color: #0288d1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .veri-tablosu {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .veri-tablosu th, .veri-tablosu td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .veri-tablosu th {
+            background-color: #f8f9fa;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+
     <!-- Firebase Kütüphaneleri -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -26,7 +168,7 @@
     </header>
 
     <!-- SAYFA 1: MÜŞTERİ SORGULAMA -->
-    <section id="sorgulama-sayfasi" class="sayfa-alani active">
+    <section id="sorgulama-sayfasi" class="sayfa-alani">
         <div class="sorgu-kutu">
             <h1>Cihaz Durumu Sorgulama</h1>
             <p>Lütfen servis takip numaranızı ve seri numaranızı giriniz.</p>
@@ -41,7 +183,7 @@
             <button class="btn-primary" id="btn-sorgula-islem">Sorgula</button>
 
             <!-- SORGULAMA SONUCU -->
-            <div id="sorgu-sonuc" class="sonuc-kutu" style="display: none;">
+            <div id="sorgu-sonuc" class="sonuc-kutu" style="display: none; margin-top: 20px;">
                 <h3>Cihaz Bilgileri</h3>
                 <p><strong>Müşteri:</strong> <span id="sonuc-musteri">-</span></p>
                 <p><strong>Cihaz / Model:</strong> <span id="sonuc-cihaz">-</span></p>
@@ -72,7 +214,7 @@
             <div class="panel-header">
                 <h2>Servis Kayıt Yönetimi</h2>
                 <div class="kullanici-bilgi">
-                    <span id="aktif-rol-bilgisi" class="rol-rozet">Giriş Yapıldı</span>
+                    <span id="aktif-rol-bilgisi" class="durum-rozet">Giriş Yapıldı</span>
                     <button class="btn-danger" id="btn-cikis-yap">Çıkış Yap</button>
                 </div>
             </div>
@@ -124,5 +266,6 @@
     </section>
 
     <!-- JS DOSYASI -->
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=5"></script>
+</body>
 </html>
