@@ -10,33 +10,36 @@ const firebaseConfig = {
 };
 
 // Firebase Başlat
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.firestore();
-const auth = firebase.auth(); // Bulut Kimlik Doğrulama Servisi
+const auth = firebase.auth();
 
 let aktifKullanici = null;
 let cihazlar = [];
 let stoklar = [];
 
-// SİSTEME GİRİŞ YAP (Sadece Firebase Auth Üzerinden)
+// SİSTEME GİRİŞ YAP (GÜVENLİ FIREBASE AUTH)
 function sistemeGirisYap() {
     const email = document.getElementById('giris-kullanici').value.trim();
     const sifre = document.getElementById('giris-sifre').value.trim();
 
     if (!email || !sifre) {
-        alert("Lütfen geçerli bir e-posta ve şifre giriniz.");
+        alert("Lütfen e-posta ve şifre giriniz.");
         return;
     }
 
-    // Giriş kontrolü doğrudan Firebase sunucusunda yapılıyor
+    // Doğrulama doğrudan Firebase Sunucularında yapılıyor
     auth.signInWithEmailAndPassword(email, sifre)
         .then((userCredential) => {
-            alert("✅ Giriş Başarılı!");
+            alert("✅ Giriş başarılı!");
             document.getElementById('giris-kullanici').value = "";
             document.getElementById('giris-sifre').value = "";
         })
         .catch((error) => {
-            alert("❌ Giriş Başarısız: E-posta veya şifre hatalı!");
+            console.error("Firebase Auth Hatası:", error);
+            alert("❌ Hata Kodu: " + error.code + "\nDetay: " + error.message);
         });
 }
 
@@ -47,7 +50,7 @@ auth.onAuthStateChanged((user) => {
     const rolRozet = document.getElementById('aktif-rol-bilgisi');
 
     if (user) {
-        // Oturum açık ise
+        // Kullanıcı giriş yapmışsa
         aktifKullanici = user;
         girisEkrani.style.display = "none";
         panelIcerigi.style.display = "block";
@@ -57,7 +60,7 @@ auth.onAuthStateChanged((user) => {
         listeyiGuncelle(cihazlar);
         stokListesiniGuncelle(stoklar);
     } else {
-        // Oturum kapalı ise
+        // Kullanıcı çıkış yapmışsa
         aktifKullanici = null;
         girisEkrani.style.display = "block";
         panelIcerigi.style.display = "none";
@@ -104,7 +107,7 @@ function yoneticiSekmeDegistir(subSekmeId) {
     }
 }
 
-// BULUT VERİTABANI CANLI DİNLEME
+// BULUT VERİTABANINI DİNLEME
 db.collection("cihazlar").onSnapshot((snapshot) => {
     cihazlar = [];
     snapshot.forEach((doc) => {
@@ -130,7 +133,7 @@ function kargoAlanlariniYonet() {
     }
 }
 
-// FORM DİNLEYİCİLERİ
+// CİHAZ VE STOK FORMLARI
 document.addEventListener('DOMContentLoaded', () => {
     const cihazFormu = document.getElementById('cihaz-formu');
     if (cihazFormu) {
