@@ -12,19 +12,64 @@ const firebaseConfig = {
 // Firebase Başlat
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
-// TANIMLI KULLANICI HESAPLARI VE YETKİLERİ
-const KULLANICILAR = [
-    { kadi: "omer.ekinci", sifre: "omer1221", unvan: "Patron", silmeYetkisi: true },
-    { kadi: "muhammed.simsek", sifre: "mami7883", unvan: "Teknik Servis Yöneticisi", silmeYetkisi: true },
-    { kadi: "yigit.turker", sifre: "yigit5678", unvan: "Teknik Servis Elemanı", silmeYetkisi: false },
-    { kadi: "emin.muhasebe", sifre: "emin.1244", unvan: "Muhasebeci", silmeYetkisi: false }
-];
+const auth = firebase.auth(); // Auth servisini tanımladık
 
 let aktifKullanici = null;
-
 let cihazlar = [];
 let stoklar = [];
+
+// SİSTEME GİRİŞ YAP (GÜVENLİ FIREBASE AUTH)
+function sistemeGirisYap() {
+    const email = document.getElementById('giris-kullanici').value.trim();
+    const sifre = document.getElementById('giris-sifre').value.trim();
+
+    if (!email || !sifre) {
+        alert("Lütfen e-posta ve şifre giriniz.");
+        return;
+    }
+
+    // Doğrulama doğrudan Firebase Sunucularında yapılıyor!
+    auth.signInWithEmailAndPassword(email, sifre)
+        .then((userCredential) => {
+            alert("✅ Giriş başarılı!");
+            document.getElementById('giris-kullanici').value = "";
+            document.getElementById('giris-sifre').value = "";
+        })
+        .catch((error) => {
+            alert("❌ Giriş Başarısız: " + error.message);
+        });
+}
+
+// OTURUM DURUMUNU CANLI DİNLEME
+auth.onAuthStateChanged((user) => {
+    const girisEkrani = document.getElementById('giris-ekrani');
+    const panelIcerigi = document.getElementById('panel-icerigi');
+    const rolRozet = document.getElementById('aktif-rol-bilgisi');
+
+    if (user) {
+        // Kullanıcı giriş yapmışsa
+        aktifKullanici = user;
+        girisEkrani.style.display = "none";
+        panelIcerigi.style.display = "block";
+        rolRozet.innerText = `Oturum Açık: ${user.email}`;
+
+        yoneticiSekmeDegistir('cihaz-yonetimi');
+        listeyiGuncelle(cihazlar);
+        stokListesiniGuncelle(stoklar);
+    } else {
+        // Kullanıcı çıkış yapmışsa
+        aktifKullanici = null;
+        girisEkrani.style.display = "block";
+        panelIcerigi.style.display = "none";
+    }
+});
+
+// ÇIKIŞ YAP
+function cikisYap() {
+    auth.signOut().then(() => {
+        alert("Çıkış yapıldı.");
+    });
+}
 
 // 1. ANA SEKME DEĞİŞTİRME FONKSİYONU
 function anaSekmeDegistir(sekmeId) {
@@ -59,44 +104,7 @@ function yoneticiSekmeDegistir(subSekmeId) {
     }
 }
 
-// 3. SİSTEME GİRİŞ YAPMA FONKSİYONU
-function sistemeGirisYap() {
-    const kadiInput = document.getElementById('giris-kullanici').value.trim().toLowerCase();
-    const sifreInput = document.getElementById('giris-sifre').value.trim();
-    
-    const girisEkrani = document.getElementById('giris-ekrani');
-    const panelIcerigi = document.getElementById('panel-icerigi');
-    const rolRozet = document.getElementById('aktif-rol-bilgisi');
-
-    const eşleşenKullanıcı = KULLANICILAR.find(u => u.kadi.toLowerCase() === kadiInput && u.sifre === sifreInput);
-
-    if (eşleşenKullanıcı) {
-        aktifKullanici = eşleşenKullanıcı;
-        girisEkrani.style.display = "none";
-        panelIcerigi.style.display = "block";
-        rolRozet.innerText = `Giriş Yapıldı: ${aktifKullanici.unvan} (${aktifKullanici.kadi})`;
-        
-        document.getElementById('giris-kullanici').value = "";
-        document.getElementById('giris-sifre').value = "";
-        
-        // İlk açılışta Cihaz Takibini göster
-        yoneticiSekmeDegistir('cihaz-yonetimi');
-        
-        listeyiGuncelle(cihazlar);
-        stokListesiniGuncelle(stoklar);
-    } else {
-        alert("❌ Hatalı kullanıcı adı veya şifre!");
-    }
-}
-
-// 4. ÇIKIŞ YAPMA FONKSİYONU
-function cikisYap() {
-    aktifKullanici = null;
-    document.getElementById('giris-ekrani').style.display = "block";
-    document.getElementById('panel-icerigi').style.display = "none";
-}
-
-// 5. BULUT VERİTABANINI DİNLEME (CANLI SENKRONİZASYON)
+// BULUT VERİTABANINI DİNLEME
 db.collection("cihazlar").onSnapshot((snapshot) => {
     cihazlar = [];
     snapshot.forEach((doc) => {
@@ -113,7 +121,7 @@ db.collection("stoklar").onSnapshot((snapshot) => {
     stokListesiniGuncelle(stoklar);
 });
 
-// 6. KARGO ALANI YÖNETİMİ
+// KARGO ALANI YÖNETİMİ
 function kargoAlanlariniYonet() {
     const gelisTipi = document.getElementById('gelis-tipi').value;
     const kargoAlani = document.getElementById('kargo-detay-alani');
@@ -122,7 +130,7 @@ function kargoAlanlariniYonet() {
     }
 }
 
-// 7. CİHAZ KAYDETME
+// CİHAZ VE STOK FORMLARI
 document.addEventListener('DOMContentLoaded', () => {
     const cihazFormu = document.getElementById('cihaz-formu');
     if (cihazFormu) {
@@ -149,11 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 durum: 'Bekliyor',
                 girisTarihi: new Date().toLocaleDateString('tr-TR'),
                 cikisTarihi: '-',
-                kaydeden: aktifKullanici ? aktifKullanici.kadi : 'Bilinmiyor'
+                kaydeden: aktifKullanici ? aktifKullanici.email : 'Bilinmiyor'
             };
 
             db.collection("cihazlar").add(yeniCihaz).then(() => {
-                alert('✅ Cihaz kaydı buluta eklendi!');
+                alert('✅ Cihaz kaydı eklendi!');
                 cihazFormu.reset();
                 kargoAlanlariniYonet();
             }).catch((err) => {
@@ -162,14 +170,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 8. STOK KAYDETME FONKSİYONU
     const stokFormu = document.getElementById('stok-formu');
     if (stokFormu) {
         stokFormu.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            if (!aktifKullanici || !aktifKullanici.silmeYetkisi) {
-                alert("❌ Stok ekleme yetkiniz bulunmamaktadır.");
+            if (!aktifKullanici) {
+                alert("❌ İşlem için giriş yapmalısınız.");
                 return;
             }
 
@@ -179,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 adet: parseInt(document.getElementById('stok-adet').value) || 0,
                 kritikLimit: parseInt(document.getElementById('stok-kritik').value) || 2,
                 fiyat: document.getElementById('stok-fiyat').value,
-                ekleyen: aktifKullanici.kadi
+                ekleyen: aktifKullanici.email
             };
 
             db.collection("stoklar").add(yeniStok).then(() => {
@@ -192,13 +199,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 9. MÜŞTERİ SORGULAMA
+// MÜŞTERİ SORGULAMA
 function musteriSorgula() {
     const aramaMetni = document.getElementById('musteri-sorgu-input').value.trim().toLowerCase();
     const sonucAlani = document.getElementById('musteri-sonuc-alani');
     
     if (!aramaMetni) {
-        sonucAlani.innerHTML = "<p style='color:red; margin-top:15px;'>Lütfen arama yapmak için Firma Adı veya Seri No giriniz.</p>";
+        sonucAlani.innerHTML = "<p style='color:red; margin-top:15px;'>Lütfen Firma Adı veya Seri No giriniz.</p>";
         return;
     }
 
@@ -208,7 +215,7 @@ function musteriSorgula() {
     );
 
     if (eslesenler.length === 0) {
-        sonucAlani.innerHTML = "<p style='margin-top:15px;'>Aradığınız kriterlere uygun cihaz bulunamadı.</p>";
+        sonucAlani.innerHTML = "<p style='margin-top:15px;'>Cihaz bulunamadı.</p>";
         return;
     }
 
@@ -228,7 +235,6 @@ function musteriSorgula() {
     sonucAlani.innerHTML = html;
 }
 
-// 10. CİHAZ TABLOSUNDA ARAMA
 function tablodaAra() {
     const aramaMetni = document.getElementById('tablo-arama').value.toLowerCase();
     const filtrelenmis = cihazlar.filter(c => 
@@ -239,7 +245,6 @@ function tablodaAra() {
     listeyiGuncelle(filtrelenmis);
 }
 
-// 11. STOK TABLOSUNDA ANLIK ARAMA
 function stokAramaYap() {
     const aramaMetni = document.getElementById('stok-arama').value.toLowerCase();
     const filtrelenmis = stoklar.filter(s => 
@@ -249,7 +254,6 @@ function stokAramaYap() {
     stokListesiniGuncelle(filtrelenmis);
 }
 
-// 12. CİHAZ LİSTESİNİ VE İSTATİSTİKLERİ GÜNCELLEME
 function listeyiGuncelle(liste) {
     const cihazListesi = document.getElementById('cihaz-listesi');
     if (!cihazListesi) return;
@@ -261,10 +265,6 @@ function listeyiGuncelle(liste) {
         if (c.durum === 'Bekliyor') bekleyen++;
         if (c.durum === 'İşlemde') islemde++;
         if (c.durum === 'Tamamlandı') tamamlanan++;
-
-        const silButonHtml = (aktifKullanici && aktifKullanici.silmeYetkisi) 
-            ? `<button onclick="cihazSil('${c.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px;">Sil</button>` 
-            : '';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -285,7 +285,7 @@ function listeyiGuncelle(liste) {
             </td>
             <td>
                 <button onclick="etiketYazdir('${c.firebaseId}')" style="background:#0d6efd; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px; margin-right:4px;">Yazdır</button>
-                ${silButonHtml}
+                <button onclick="cihazSil('${c.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:5px 8px; cursor:pointer; border-radius:3px;">Sil</button>
             </td>
         `;
         cihazListesi.appendChild(tr);
@@ -297,7 +297,6 @@ function listeyiGuncelle(liste) {
     if (document.getElementById('tamamlanan-sayi')) document.getElementById('tamamlanan-sayi').innerText = tamamlanan;
 }
 
-// 13. STOK LİSTESİNİ GÜNCELLEME
 function stokListesiniGuncelle(liste) {
     const stokListesi = document.getElementById('stok-listesi');
     if (!stokListesi) return;
@@ -308,10 +307,6 @@ function stokListesiniGuncelle(liste) {
         const durumBadge = kritikDurum 
             ? `<span style="background:#dc3545; color:white; padding:3px 8px; border-radius:10px; font-size:12px; font-weight:bold;">⚠️ Kritik Stok</span>` 
             : `<span style="background:#28a745; color:white; padding:3px 8px; border-radius:10px; font-size:12px;">✅ Yeterli</span>`;
-
-        const silButonHtml = (aktifKullanici && aktifKullanici.silmeYetkisi) 
-            ? `<button onclick="stokSil('${s.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px;">Sil</button>` 
-            : '';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -324,32 +319,24 @@ function stokListesiniGuncelle(liste) {
             <td>
                 <button onclick="stokAdetGuncelle('${s.firebaseId}', ${s.adet + 1})" style="background:#198754; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px; margin-right:2px;">+</button>
                 <button onclick="stokAdetGuncelle('${s.firebaseId}', ${s.adet - 1})" style="background:#ffc107; color:black; border:none; padding:4px 8px; cursor:pointer; border-radius:3px; margin-right:4px;">-</button>
-                ${silButonHtml}
+                <button onclick="stokSil('${s.firebaseId}')" style="background:#d9534f; color:white; border:none; padding:4px 8px; cursor:pointer; border-radius:3px;">Sil</button>
             </td>
         `;
         stokListesi.appendChild(tr);
     });
 }
 
-// 14. STOK ADET GÜNCELLEME VE SİLME
 function stokAdetGuncelle(firebaseId, yeniAdet) {
     if (yeniAdet < 0) return;
-    db.collection("stoklar").doc(firebaseId).update({
-        adet: yeniAdet
-    });
+    db.collection("stoklar").doc(firebaseId).update({ adet: yeniAdet });
 }
 
 function stokSil(firebaseId) {
-    if (!aktifKullanici || !aktifKullanici.silmeYetkisi) {
-        alert("❌ Stok silme yetkiniz yok!");
-        return;
-    }
     if (confirm('Bu parça stoğunu silmek istediğinize emin misiniz?')) {
         db.collection("stoklar").doc(firebaseId).delete();
     }
 }
 
-// 15. CİHAZ DURUM GÜNCELLEME VE SİLME
 function durumDegistir(firebaseId, yeniDurum) {
     db.collection("cihazlar").doc(firebaseId).update({
         durum: yeniDurum,
@@ -358,16 +345,11 @@ function durumDegistir(firebaseId, yeniDurum) {
 }
 
 function cihazSil(firebaseId) {
-    if (!aktifKullanici || !aktifKullanici.silmeYetkisi) {
-        alert("❌ Bu işlem için yetkiniz yok!");
-        return;
-    }
     if (confirm('Bu kaydı bulut veritabanından silmek istediğinize emin misiniz?')) {
         db.collection("cihazlar").doc(firebaseId).delete();
     }
 }
 
-// 16. ETİKET YAZDIRMA FONKSİYONU
 function etiketYazdir(firebaseId) {
     const cihaz = cihazlar.find(c => c.firebaseId === firebaseId);
     if (!cihaz) return;
@@ -381,21 +363,15 @@ function etiketYazdir(firebaseId) {
     qrKapsayici.innerHTML = "";
 
     const qrText = encodeURIComponent(cihaz.seriNo || '000000');
-    
     const qrImg = document.createElement('img');
     qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=${qrText}`;
     qrImg.style.width = "64px";
     qrImg.style.height = "64px";
     
     qrImg.onload = function() {
-        setTimeout(() => {
-            window.print();
-        }, 100);
+        setTimeout(() => { window.print(); }, 100);
     };
-
-    qrImg.onerror = function() {
-        window.print();
-    };
+    qrImg.onerror = function() { window.print(); };
 
     qrKapsayici.appendChild(qrImg);
 }
