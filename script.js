@@ -19,11 +19,12 @@ let mevcutKullaniciRol = "personel";
 
 document.addEventListener("DOMContentLoaded", () => {
     
-    // SEKME YÖNETİMİ
+    // NAVIGATION SEKMELERİ
+    const btnSorgula = document.getElementById("btn-sorgula-sekme");
     const btnPanel = document.getElementById("btn-panel-sekme");
     const btnKargo = document.getElementById("btn-kargo-sekme");
     const btnStok = document.getElementById("btn-stok-sekme");
-    const btnSorgula = document.getElementById("btn-sorgula-sekme");
+    const btnYetki = document.getElementById("btn-yetki-sekme");
 
     const sorguSayfasi = document.getElementById("sorgulama-sayfasi");
     const panelSayfasi = document.getElementById("panel-sayfasi");
@@ -31,13 +32,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const sekmeServis = document.getElementById("sekme-servis-icerik");
     const sekmeKargo = document.getElementById("sekme-kargo-icerik");
     const sekmeStok = document.getElementById("sekme-stok-icerik");
+    const sekmeYetki = document.getElementById("sekme-yetki-icerik");
 
     function sekmeleriSifirla() {
+        btnSorgula.classList.remove("active");
         btnPanel.classList.remove("active");
         btnKargo.classList.remove("active");
         btnStok.classList.remove("active");
-        btnSorgula.classList.remove("active");
+        btnYetki.classList.remove("active");
     }
+
+    btnSorgula.addEventListener("click", () => {
+        sekmeleriSifirla();
+        btnSorgula.classList.add("active");
+        sorguSayfasi.style.display = "block";
+        panelSayfasi.style.display = "none";
+    });
 
     btnPanel.addEventListener("click", () => {
         sekmeleriSifirla();
@@ -47,6 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sekmeServis.style.display = "block";
         sekmeKargo.style.display = "none";
         sekmeStok.style.display = "none";
+        sekmeYetki.style.display = "none";
     });
 
     btnKargo.addEventListener("click", () => {
@@ -57,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sekmeServis.style.display = "none";
         sekmeKargo.style.display = "block";
         sekmeStok.style.display = "none";
+        sekmeYetki.style.display = "none";
         kargolariGetir();
     });
 
@@ -68,55 +80,132 @@ document.addEventListener("DOMContentLoaded", () => {
         sekmeServis.style.display = "none";
         sekmeKargo.style.display = "none";
         sekmeStok.style.display = "block";
+        sekmeYetki.style.display = "none";
         stoklariGetir();
     });
 
-    btnSorgula.addEventListener("click", () => {
+    btnYetki.addEventListener("click", () => {
         sekmeleriSifirla();
-        btnSorgula.classList.add("active");
-        sorguSayfasi.style.display = "block";
-        panelSayfasi.style.display = "none";
+        btnYetki.classList.add("active");
+        sorguSayfasi.style.display = "none";
+        panelSayfasi.style.display = "block";
+        sekmeServis.style.display = "none";
+        sekmeKargo.style.display = "none";
+        sekmeStok.style.display = "none";
+        sekmeYetki.style.display = "block";
+        yetkileriGetir();
     });
 
-    // BUTON KONTROLLERİ
+    // BUTON TETİKLEYİCİLERİ
     document.getElementById("btn-giris-yap")?.addEventListener("click", girisYap);
     document.getElementById("btn-cikis-yap")?.addEventListener("click", () => auth.signOut());
     document.getElementById("btn-cihaz-ekle")?.addEventListener("click", yeniCihazEkle);
     document.getElementById("btn-kargo-ekle")?.addEventListener("click", yeniKargoEkle);
     document.getElementById("btn-stok-ekle")?.addEventListener("click", yeniStokEkle);
+    document.getElementById("btn-yetki-kaydet")?.addEventListener("click", yetkiGuncelle);
     document.getElementById("btn-sorgula")?.addEventListener("click", sorgulaCihaz);
 });
 
-// GİRİŞ YAP
+// GİRİŞ İŞLEMİ
 function girisYap() {
     const email = document.getElementById("giris-kullanici").value.trim();
     const sifre = document.getElementById("giris-sifre").value.trim();
-    if (!email || !sifre) return alert("E-posta ve şifre giriniz.");
+    if (!email || !sifre) return alert("E-posta ve şifrenizi giriniz.");
 
     auth.signInWithEmailAndPassword(email, sifre)
         .then(() => alert("Giriş Başarılı!"))
-        .catch(err => alert("Hata: " + err.message));
+        .catch(err => alert("Giriş Hatası: " + err.message));
 }
 
-// OTURUM DURUMU
+// OTURUM DİNLEYİCİSİ VE ROL KONTROLÜ
 auth.onAuthStateChanged((user) => {
     const girisEkrani = document.getElementById("giris-ekrani");
     const panelIcerigi = document.getElementById("panel-icerigi");
     const rolRozet = document.getElementById("aktif-rol-bilgisi");
+    
+    const oturumSartliSekmeler = document.querySelectorAll(".oturum-sartli");
+    const adminSartliSekmeler = document.querySelectorAll(".admin-sartli");
 
     if (user) {
         if (girisEkrani) girisEkrani.style.display = "none";
         if (panelIcerigi) panelIcerigi.style.display = "block";
-        
-        mevcutKullaniciRol = (user.email === "admin@desnet.com" || user.email.includes("admin")) ? "admin" : "personel";
-        if (rolRozet) rolRozet.innerText = `Oturum Açık: ${user.email} (${mevcutKullaniciRol.toUpperCase()})`;
 
-        cihazlariGetir();
+        // Giriş yapıldığı için Kargo ve Stok sekmelerini aç
+        oturumSartliSekmeler.forEach(el => el.style.display = "inline-block");
+
+        // Kullanıcının Veritabanından Rolünü Sorgula
+        db.collection("kullanicilar").doc(user.email).get().then((doc) => {
+            if (doc.exists && doc.data().rol) {
+                mevcutKullaniciRol = doc.data().rol;
+            } else if (user.email === "admin@desnet.com") {
+                mevcutKullaniciRol = "admin";
+            } else {
+                mevcutKullaniciRol = "personel";
+            }
+
+            if (rolRozet) rolRozet.innerText = `Oturum Açık: ${user.email} (${mevcutKullaniciRol.toUpperCase()})`;
+
+            // Sadece Admin ise Yetki Yönetimi sekmesini göster
+            if (mevcutKullaniciRol === "admin") {
+                adminSartliSekmeler.forEach(el => el.style.display = "inline-block");
+            } else {
+                adminSartliSekmeler.forEach(el => el.style.display = "none");
+            }
+
+            cihazlariGetir();
+        });
+
     } else {
         if (girisEkrani) girisEkrani.style.display = "block";
         if (panelIcerigi) panelIcerigi.style.display = "none";
+
+        // Çıkış yapıldığında oturum şartlı sekmeleri gizle
+        oturumSartliSekmeler.forEach(el => el.style.display = "none");
+        adminSartliSekmeler.forEach(el => el.style.display = "none");
     }
 });
+
+// YETKİ GÜNCELLEME / ATAMA
+function yetkiGuncelle() {
+    const email = document.getElementById("yetki-email").value.trim();
+    const rol = document.getElementById("yetki-rol").value;
+
+    if (!email) return alert("Lütfen kullanıcı e-postasını girin.");
+
+    db.collection("kullanicilar").doc(email).set({
+        email: email,
+        rol: rol,
+        guncellemeTarihi: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        alert(`✅ ${email} adresi için yetki (${rol.toUpperCase()}) olarak güncellendi!`);
+        document.getElementById("yetki-email").value = "";
+    }).catch(err => alert("Yetki güncelleme hatası: " + err.message));
+}
+
+function yetkileriGetir() {
+    const tabloBody = document.getElementById("yetki-tablo-body");
+    db.collection("kullanicilar").onSnapshot((snapshot) => {
+        tabloBody.innerHTML = "";
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><b>${data.email}</b></td>
+                <td><span class="badge ${data.rol === 'admin' ? 'badge-danger' : 'badge-success'}">${data.rol.toUpperCase()}</span></td>
+                <td>
+                    <button type="button" class="btn-sil" onclick="yetkiSil('${doc.id}')">Yetkiyi Kaldır</button>
+                </td>
+            `;
+            tabloBody.appendChild(tr);
+        });
+    });
+}
+
+function yetkiSil(email) {
+    if (confirm(`${email} kullanıcısının tanımlı yetkisini kaldırmak istiyor musunuz?`)) {
+        db.collection("kullanicilar").doc(email).delete();
+    }
+}
 
 // CİHAZ İŞLEMLERİ
 function cihazlariGetir() {
