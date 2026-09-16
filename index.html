@@ -3,269 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teknik Servis Takip Sistemi</title>
+    <title>Desnet Teknik Servis Takip</title>
+    <link rel="stylesheet" href="style.css">
     
-    <!-- CSS (Doğrudan HTML İçine Gömüldü) -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f4f6f9;
-            color: #333;
-        }
-
-        .navbar {
-            background-color: #1a252f;
-            color: #fff;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-btn {
-            background: transparent;
-            border: 1px solid #fff;
-            color: #fff;
-            padding: 8px 16px;
-            margin-left: 10px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        .nav-btn.active, .nav-btn:hover {
-            background-color: #3498db;
-            border-color: #3498db;
-        }
-
-        .sayfa-alani {
-            padding: 40px 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .sorgu-kutu, .giris-kutu, .kayit-form-kutu, .liste-kutu {
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .form-grup {
-            margin-bottom: 15px;
-        }
-
-        .form-grup input, .form-row input, .form-row select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-
-        .btn-primary {
-            background-color: #3498db;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-        }
-
-        .btn-primary:hover {
-            background-color: #2980b9;
-        }
-
-        .btn-success {
-            background-color: #2ecc71;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .btn-danger {
-            background-color: #e74c3c;
-            color: #fff;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .btn-danger-sm {
-            background-color: #e74c3c;
-            color: #fff;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .durum-rozet {
-            background: #e1f5fe;
-            color: #0288d1;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        .veri-tablosu {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        .veri-tablosu th, .veri-tablosu td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-
-        .veri-tablosu th {
-            background-color: #f8f9fa;
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 10px;
-        }
-    </style>
-
-    <!-- Firebase Kütüphaneleri -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase SDK (v8 Web) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
 
-    <!-- ÜST MENÜ -->
-    <header class="navbar">
-        <div class="logo">
-            <h2>Teknik Servis Takip Sistemi</h2>
-        </div>
+    <header>
+        <div class="logo">DESNET TEKNİK</div>
         <nav>
-            <button class="nav-btn active" id="btn-sorgula-sekme">Müşteri Sorgulama</button>
-            <button class="nav-btn" id="btn-panel-sekme">Yönetici Paneli</button>
+            <button type="button" id="btn-sorgula-sekme" class="active">Müşteri Sorgulama</button>
+            <button type="button" id="btn-panel-sekme">Yönetici Paneli</button>
         </nav>
     </header>
 
-    <!-- SAYFA 1: MÜŞTERİ SORGULAMA -->
-    <section id="sorgulama-sayfasi" class="sayfa-alani">
-        <div class="sorgu-kutu">
-            <h1>Cihaz Durumu Sorgulama</h1>
-            <p>Lütfen servis takip numaranızı ve seri numaranızı giriniz.</p>
-            
-            <div class="form-grup">
-                <input type="text" id="sorgu-no" placeholder="Servis Takip No (Örn: DES-1001)">
-            </div>
-            <div class="form-grup">
-                <input type="text" id="sorgu-sn" placeholder="Seri No (SN)">
-            </div>
-            
-            <button class="btn-primary" id="btn-sorgula-islem">Sorgula</button>
-
-            <!-- SORGULAMA SONUCU -->
-            <div id="sorgu-sonuc" class="sonuc-kutu" style="display: none; margin-top: 20px;">
-                <h3>Cihaz Bilgileri</h3>
-                <p><strong>Müşteri:</strong> <span id="sonuc-musteri">-</span></p>
-                <p><strong>Cihaz / Model:</strong> <span id="sonuc-cihaz">-</span></p>
-                <p><strong>Seri No:</strong> <span id="sonuc-sn">-</span></p>
-                <p><strong>Durum:</strong> <span id="sonuc-durum" class="durum-rozet">-</span></p>
-                <p><strong>Açıklama:</strong> <span id="sonuc-aciklama">-</span></p>
-            </div>
-        </div>
-    </section>
-
-    <!-- SAYFA 2: YÖNETİCİ PANELİ -->
-    <section id="panel-sayfasi" class="sayfa-alani" style="display: none;">
+    <div class="container">
         
-        <!-- YÖNETİCİ GİRİŞ EKRANI -->
-        <div id="giris-ekrani" class="giris-kutu">
-            <h2>Yönetici Girişi</h2>
-            <div class="form-grup">
-                <input type="email" id="giris-kullanici" placeholder="E-posta Adresi">
+        <!-- 1. MÜŞTERİ SORGULAMA SAYFASI -->
+        <section id="sorgulama-sayfasi">
+            <div class="card">
+                <h2>Cihaz Durum Sorgulama</h2>
+                <p>Cihazınızın durumunu öğrenmek için size verilen <strong>Takip Numarasını (Örn: DES-1234)</strong> giriniz.</p>
+                <div class="form-group">
+                    <input type="text" id="sorgu-kod" placeholder="Takip No Giriniz...">
+                    <button type="button" id="btn-sorgula">Sorgula</button>
+                </div>
+                <div id="sorgu-sonuc" style="margin-top: 20px;"></div>
             </div>
-            <div class="form-grup">
-                <input type="password" id="giris-sifre" placeholder="Şifre">
-            </div>
-            <button class="btn-primary" id="btn-giris-yap">Giriş Yap</button>
-        </div>
+        </section>
 
-        <!-- YÖNETİCİ PANEL İÇERİĞİ -->
-        <div id="panel-icerigi" style="display: none;">
-            <div class="panel-header">
-                <h2>Servis Kayıt Yönetimi</h2>
-                <div class="kullanici-bilgi">
-                    <span id="aktif-rol-bilgisi" class="durum-rozet">Giriş Yapıldı</span>
-                    <button class="btn-danger" id="btn-cikis-yap">Çıkış Yap</button>
+        <!-- 2. YÖNETİCİ PANELİ -->
+        <section id="panel-sayfasi" style="display: none;">
+            
+            <!-- GİRİŞ EKRANI -->
+            <div id="giris-ekrani" class="card">
+                <h2>Yönetici Girişi</h2>
+                <div class="form-group">
+                    <input type="email" id="giris-kullanici" placeholder="E-posta Adresi">
+                    <input type="password" id="giris-sifre" placeholder="Şifre">
+                    <button type="button" id="btn-giris-yap">Giriş Yap</button>
                 </div>
             </div>
 
-            <!-- YENİ SERVİS KAYIT FORMU -->
-            <div class="kayit-form-kutu">
-                <h3>Yeni Servis Kaydı Oluştur</h3>
-                <form id="yeni-kayit-formu">
-                    <div class="form-row">
-                        <input type="text" id="kayit-musteri" placeholder="Müşteri Adı / Firma" required>
-                        <input type="text" id="kayit-cihaz" placeholder="Cihaz Adı / Model" required>
-                        <input type="text" id="kayit-sn" placeholder="Seri No (SN)" required>
-                    </div>
-                    <div class="form-row">
-                        <select id="kayit-durum">
-                            <option value="İşlem Bekliyor">İşlem Bekliyor</option>
-                            <option value="Onarımda">Onarımda</option>
-                            <option value="Parça Bekliyor">Parça Bekliyor</option>
-                            <option value="Tamamlandı">Tamamlandı</option>
-                            <option value="İptal Edildi">İptal Edildi</option>
-                        </select>
-                        <input type="text" id="kayit-aciklama" placeholder="Servis Açıklaması / Arıza Detayı">
-                    </div>
-                    <button type="submit" class="btn-success">Kaydı Kaydet</button>
-                </form>
-            </div>
+            <!-- PANEL İÇERİĞİ -->
+            <div id="panel-icerigi" style="display: none;">
+                <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <span id="aktif-rol-bilgisi" style="font-weight:bold; color:#0056b3;"></span>
+                    <button type="button" id="btn-cikis-yap" class="btn-sil">Çıkış Yap</button>
+                </div>
 
-            <!-- KAYITLI SERVİS LİSTESİ -->
-            <div class="liste-kutu">
-                <h3>Servisteki Cihazlar</h3>
-                <table class="veri-tablosu">
-                    <thead>
-                        <tr>
-                            <th>Takip No</th>
-                            <th>Müşteri</th>
-                            <th>Cihaz</th>
-                            <th>Seri No</th>
-                            <th>Durum</th>
-                            <th>Açıklama</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody id="servis-listesi-body">
-                        <!-- JS ile dolacak -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
+                <!-- CİHAZ EKLEME FORMU -->
+                <div class="card">
+                    <h3>Yeni Cihaz Kaydı</h3>
+                    <form onsubmit="return false;">
+                        <div class="form-grid">
+                            <input type="text" id="yeni-musteri" placeholder="Müşteri Adı Soyadı">
+                            <input type="text" id="yeni-cihaz" placeholder="Cihaz Modeli (Örn: Zebra ZD230d)">
+                            <input type="text" id="yeni-seri" placeholder="Seri Numarası">
+                            <select id="yeni-durum">
+                                <option value="İşlemde">İşlemde</option>
+                                <option value="Parça Bekliyor">Parça Bekliyor</option>
+                                <option value="Tamamlandı">Tamamlandı</option>
+                                <option value="Teslim Edildi">Teslim Edildi</option>
+                            </select>
+                        </div>
+                        <textarea id="yeni-aciklama" placeholder="Arıza / İşlem Açıklaması" rows="3" style="width:100%; margin-top:10px;"></textarea>
+                        <button type="button" id="btn-cihaz-ekle" style="margin-top: 10px;">Cihazı Kaydet</button>
+                    </form>
+                </div>
 
-    <!-- JS DOSYASI -->
-    <script src="script.js?v=5"></script>
+                <!-- CİHAZ LİSTESİ -->
+                <div class="card" style="margin-top: 20px;">
+                    <h3>Servisteki Cihazlar</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Takip No</th>
+                                <th>Müşteri</th>
+                                <th>Cihaz</th>
+                                <th>Seri No</th>
+                                <th>Durum</th>
+                                <th>Açıklama</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cihaz-tablo-body">
+                            <!-- Veriler JS ile buraya gelecek -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <script src="script.js?v=20"></script>
 </body>
 </html>
