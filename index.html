@@ -3,65 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desnet Teknik Servis Takip</title>
+    <title>Desnet Teknik Servis & Stok Yönetimi</title>
     <link rel="stylesheet" href="style.css">
-    
-    <!-- Firebase SDK (v8 Web) -->
+    <!-- Firebase SDK (v8) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 </head>
 <body>
 
+    <!-- NAVİGASYON & HEADER -->
     <header>
-        <div class="logo">DESNET TEKNİK</div>
+        <div class="logo-container">
+            <img src="logo.png" alt="Desnet Logo" class="main-logo">
+        </div>
         <nav>
-            <button type="button" id="btn-sorgula-sekme" class="active">Müşteri Sorgulama</button>
-            <button type="button" id="btn-panel-sekme">Yönetici Paneli</button>
+            <button id="btn-panel-sekme" class="active">Servis Paneli</button>
+            <button id="btn-kargo-sekme">Kargo Takip</button>
+            <button id="btn-stok-sekme">Stok Yönetimi</button>
+            <button id="btn-sorgula-sekme">Müşteri Sorgulama</button>
         </nav>
     </header>
 
     <div class="container">
-        
+
         <!-- 1. MÜŞTERİ SORGULAMA SAYFASI -->
-        <section id="sorgulama-sayfasi">
+        <div id="sorgulama-sayfasi" style="display: none;">
             <div class="card">
-                <h2>Cihaz Durum Sorgulama</h2>
-                <p>Cihazınızın durumunu öğrenmek için size verilen <strong>Takip Numarasını (Örn: DES-1234)</strong> giriniz.</p>
+                <h2>🔍 Cihaz Durum Sorgulama</h2>
                 <div class="form-group">
-                    <input type="text" id="sorgu-kod" placeholder="Takip No Giriniz...">
-                    <button type="button" id="btn-sorgula">Sorgula</button>
+                    <input type="text" id="sorgu-kod" placeholder="Servis Takip Numarası (Örn: DES-1234)">
+                    <button id="btn-sorgula">Sorgula</button>
                 </div>
                 <div id="sorgu-sonuc" style="margin-top: 20px;"></div>
             </div>
-        </section>
+        </div>
 
-        <!-- 2. YÖNETİCİ PANELİ -->
-        <section id="panel-sayfasi" style="display: none;">
-            
+        <!-- 2. SERVİS PANELİ (GİRİŞ ŞARTLI) -->
+        <div id="panel-sayfasi">
+
             <!-- GİRİŞ EKRANI -->
-            <div id="giris-ekrani" class="card">
-                <h2>Yönetici Girişi</h2>
-                <div class="form-group">
-                    <input type="email" id="giris-kullanici" placeholder="E-posta Adresi">
+            <div id="giris-ekrani" class="card" style="max-width: 400px; margin: 50px auto;">
+                <h2>🔐 Personel Girişi</h2>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                    <input type="email" id="giris-kullanici" placeholder="E-Posta">
                     <input type="password" id="giris-sifre" placeholder="Şifre">
-                    <button type="button" id="btn-giris-yap">Giriş Yap</button>
+                    <button id="btn-giris-yap">Giriş Yap</button>
                 </div>
             </div>
 
             <!-- PANEL İÇERİĞİ -->
             <div id="panel-icerigi" style="display: none;">
-                <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <span id="aktif-rol-bilgisi" style="font-weight:bold; color:#0056b3;"></span>
-                    <button type="button" id="btn-cikis-yap" class="btn-sil">Çıkış Yap</button>
+
+                <div class="user-bar">
+                    <span id="aktif-rol-bilgisi">Oturum Yükleniyor...</span>
+                    <button id="btn-cikis-yap" class="btn-sil">Çıkış Yap</button>
                 </div>
 
-                <!-- CİHAZ EKLEME FORMU -->
-                <div class="card">
-                    <h3>Yeni Cihaz Kaydı</h3>
-                    <form onsubmit="return false;">
+                <!-- SERVİS SEKMESİ İÇERİĞİ -->
+                <div id="sekme-servis-icerik">
+                    <div class="card">
+                        <h2>🛠️ Yeni Cihaz Kaydı</h2>
                         <div class="form-grid">
-                            <input type="text" id="yeni-musteri" placeholder="Müşteri Adı Soyadı">
+                            <input type="text" id="yeni-musteri" placeholder="Müşteri Adı Soyadı / Firma">
                             <input type="text" id="yeni-cihaz" placeholder="Cihaz Modeli (Örn: Zebra ZD230d)">
                             <input type="text" id="yeni-seri" placeholder="Seri Numarası">
                             <select id="yeni-durum">
@@ -69,39 +73,106 @@
                                 <option value="Parça Bekliyor">Parça Bekliyor</option>
                                 <option value="Tamamlandı">Tamamlandı</option>
                                 <option value="Teslim Edildi">Teslim Edildi</option>
+                                <option value="İptal / İade">İptal / İade</option>
                             </select>
                         </div>
-                        <textarea id="yeni-aciklama" placeholder="Arıza / İşlem Açıklaması" rows="3" style="width:100%; margin-top:10px;"></textarea>
-                        <button type="button" id="btn-cihaz-ekle" style="margin-top: 10px;">Cihazı Kaydet</button>
-                    </form>
+                        <textarea id="yeni-aciklama" placeholder="Arıza / İşlem Açıklaması" style="margin-top: 15px;"></textarea>
+                        <button id="btn-cihaz-ekle" style="margin-top: 15px;">Cihazı Kaydet</button>
+                    </div>
+
+                    <div class="card">
+                        <h2>📋 Servisteki Cihazlar</h2>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Takip No</th>
+                                        <th>Müşteri</th>
+                                        <th>Cihaz</th>
+                                        <th>Seri No</th>
+                                        <th>Durum</th>
+                                        <th>Açıklama</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cihaz-tablo-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- CİHAZ LİSTESİ -->
-                <div class="card" style="margin-top: 20px;">
-                    <h3>Servisteki Cihazlar</h3>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Takip No</th>
-                                <th>Müşteri</th>
-                                <th>Cihaz</th>
-                                <th>Seri No</th>
-                                <th>Durum</th>
-                                <th>Açıklama</th>
-                                <th>İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cihaz-tablo-body">
-                            <!-- Veriler JS ile buraya gelecek -->
-                        </tbody>
-                    </table>
+                <!-- KARGO SEKMESİ İÇERİĞİ -->
+                <div id="sekme-kargo-icerik" style="display: none;">
+                    <div class="card">
+                        <h2>📦 Kargo Giriş / Çıkış Kaydı</h2>
+                        <div class="form-grid">
+                            <input type="text" id="kargo-firma" placeholder="Kargo Firması (Yurtiçi, Aras...)">
+                            <input type="text" id="kargo-takip-no" placeholder="Kargo Takip No">
+                            <input type="text" id="kargo-gonderen" placeholder="Gönderen / Alıcı Müşteri">
+                            <select id="kargo-tipi">
+                                <option value="Gelen Kargo">Gelen Kargo</option>
+                                <option value="Giden Kargo">Giden Kargo</option>
+                            </select>
+                        </div>
+                        <button id="btn-kargo-ekle" style="margin-top: 15px;">Kargo Kaydını Ekle</button>
+                    </div>
+
+                    <div class="card">
+                        <h2>🚚 Kargo Hareketleri</h2>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Tip</th>
+                                        <th>Kargo Firması</th>
+                                        <th>Kargo Takip No</th>
+                                        <th>Müşteri</th>
+                                        <th>Tarih</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kargo-tablo-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STOK SEKMESİ İÇERİĞİ -->
+                <div id="sekme-stok-icerik" style="display: none;">
+                    <div class="card">
+                        <h2>🧱 Yeni Stok / Yedek Parça Ekle</h2>
+                        <div class="form-grid">
+                            <input type="text" id="stok-ad" placeholder="Parça / Ürün Adı (Örn: ZD230d Thermal Head)">
+                            <input type="text" id="stok-kod" placeholder="Stok Kodu / Parça No">
+                            <input type="number" id="stok-adet" placeholder="Adet">
+                            <input type="text" id="stok-raf" placeholder="Raf / Konum Kodu">
+                        </div>
+                        <button id="btn-stok-ekle" style="margin-top: 15px;">Stok Ekle</button>
+                    </div>
+
+                    <div class="card">
+                        <h2>📊 Stok Listesi</h2>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Stok Kodu</th>
+                                        <th>Ürün Adı</th>
+                                        <th>Adet</th>
+                                        <th>Raf/Konum</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stok-tablo-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
             </div>
-        </section>
+        </div>
 
     </div>
 
-  <script src="script.js?v=2026"></script>
+    <script src="script.js?v=2026_v2"></script>
 </body>
 </html>
