@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desnet Teknik Servis & Stok Yönetimi</title>
+    <title>Desnet Teknik Servis & Yönetim Paneli</title>
     <link rel="stylesheet" href="style.css">
     <!-- Firebase SDK (v8) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -12,23 +12,27 @@
 </head>
 <body>
 
-    <!-- NAVİGASYON & HEADER -->
+    <!-- NAVİGASYON -->
     <header>
         <div class="logo-container">
             <img src="logo.png" alt="Desnet Logo" class="main-logo">
         </div>
         <nav>
-            <button id="btn-panel-sekme" class="active">Servis Paneli</button>
-            <button id="btn-kargo-sekme">Kargo Takip</button>
-            <button id="btn-stok-sekme">Stok Yönetimi</button>
-            <button id="btn-sorgula-sekme">Müşteri Sorgulama</button>
+            <!-- İlk Açılışta Sadece Bu İkisi Görünür -->
+            <button id="btn-sorgula-sekme" class="active">Müşteri Sorgulama</button>
+            <button id="btn-panel-sekme">Yönetici Paneli</button>
+
+            <!-- Giriş Yapınca Açılan Sekmeler -->
+            <button id="btn-kargo-sekme" class="oturum-sartli" style="display: none;">Kargo Takip</button>
+            <button id="btn-stok-sekme" class="oturum-sartli" style="display: none;">Stok Yönetimi</button>
+            <button id="btn-yetki-sekme" class="admin-sartli" style="display: none;">Yetki Yönetimi</button>
         </nav>
     </header>
 
     <div class="container">
 
-        <!-- 1. MÜŞTERİ SORGULAMA SAYFASI -->
-        <div id="sorgulama-sayfasi" style="display: none;">
+        <!-- 1. MÜŞTERİ SORGULAMA SAYFASI (VARSAYILAN AÇILIŞ) -->
+        <div id="sorgulama-sayfasi">
             <div class="card">
                 <h2>🔍 Cihaz Durum Sorgulama</h2>
                 <div class="form-group">
@@ -39,12 +43,12 @@
             </div>
         </div>
 
-        <!-- 2. SERVİS PANELİ (GİRİŞ ŞARTLI) -->
-        <div id="panel-sayfasi">
+        <!-- 2. YÖNETİCİ PANELİ -->
+        <div id="panel-sayfasi" style="display: none;">
 
             <!-- GİRİŞ EKRANI -->
             <div id="giris-ekrani" class="card" style="max-width: 400px; margin: 50px auto;">
-                <h2>🔐 Personel Girişi</h2>
+                <h2>🔐 Personel / Yönetici Girişi</h2>
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
                     <input type="email" id="giris-kullanici" placeholder="E-Posta">
                     <input type="password" id="giris-sifre" placeholder="Şifre">
@@ -141,7 +145,7 @@
                     <div class="card">
                         <h2>🧱 Yeni Stok / Yedek Parça Ekle</h2>
                         <div class="form-grid">
-                            <input type="text" id="stok-ad" placeholder="Parça / Ürün Adı (Örn: ZD230d Thermal Head)">
+                            <input type="text" id="stok-ad" placeholder="Parça / Ürün Adı">
                             <input type="text" id="stok-kod" placeholder="Stok Kodu / Parça No">
                             <input type="number" id="stok-adet" placeholder="Adet">
                             <input type="text" id="stok-raf" placeholder="Raf / Konum Kodu">
@@ -168,11 +172,42 @@
                     </div>
                 </div>
 
+                <!-- YETKİ YÖNETİMİ SEKMESİ (SADECE ADMİN) -->
+                <div id="sekme-yetki-icerik" style="display: none;">
+                    <div class="card">
+                        <h2>👑 Personel Yetki Yönetimi</h2>
+                        <div class="form-grid">
+                            <input type="email" id="yetki-email" placeholder="Kullanıcı E-Posta Adresi">
+                            <select id="yetki-rol">
+                                <option value="personel">Personel (Sınırlı)</option>
+                                <option value="admin">Yönetici / Admin (Tam Yetki)</option>
+                            </select>
+                        </div>
+                        <button id="btn-yetki-kaydet" style="margin-top: 15px;">Yetkiyi Güncelle / Tanımla</button>
+                    </div>
+
+                    <div class="card">
+                        <h2>👥 Kayıtlı Yetkiler</h2>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>E-Posta</th>
+                                        <th>Tanımlı Rol</th>
+                                        <th>İşlem</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="yetki-tablo-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
     </div>
 
-    <script src="script.js?v=2026_v2"></script>
+    <script src="script.js?v=2026_v3"></script>
 </body>
 </html>
