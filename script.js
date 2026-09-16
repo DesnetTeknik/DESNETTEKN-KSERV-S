@@ -1,6 +1,6 @@
-// FIREBASE YAPILANDIRMASI
+// FIREBASE YAPILANDIRMASI (Senin Özel API Key'in İle)
 const firebaseConfig = {
-    apiKey: "AIzaSyCjVuS94dkxNlPfp04Eqgty0sj7Xo0qc6s",
+    apiKey: "AIzaSyCjVuS94dkxNLPfp04Eqgty0sj7Xo0qc6s",
     authDomain: "desnetteknik-66527.firebaseapp.com",
     projectId: "desnetteknik-66527",
     storageBucket: "desnetteknik-66527.firebasestorage.app",
@@ -15,9 +15,10 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-let mevcutKullaniciRol = "personel"; // Varsayılan rol
+let mevcutKullaniciRol = "personel";
 
 document.addEventListener("DOMContentLoaded", () => {
+    
     // 1. SEKME GEÇİŞLERİ
     const btnSorgulaSekme = document.getElementById("btn-sorgula-sekme");
     const btnPanelSekme = document.getElementById("btn-panel-sekme");
@@ -25,14 +26,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const panelSayfasi = document.getElementById("panel-sayfasi");
 
     if (btnSorgulaSekme && btnPanelSekme) {
-        btnSorgulaSekme.addEventListener("click", () => {
+        btnSorgulaSekme.addEventListener("click", (e) => {
+            e.preventDefault();
             sorgulamaSayfasi.style.display = "block";
             panelSayfasi.style.display = "none";
             btnSorgulaSekme.classList.add("active");
             btnPanelSekme.classList.remove("active");
         });
 
-        btnPanelSekme.addEventListener("click", () => {
+        btnPanelSekme.addEventListener("click", (e) => {
+            e.preventDefault();
             sorgulamaSayfasi.style.display = "none";
             panelSayfasi.style.display = "block";
             btnPanelSekme.classList.add("active");
@@ -40,10 +43,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 2. OTURUM VE GİRİŞ İŞLEMLERİ
+    // 2. GİRİŞ YAP BUTONU
     const btnGiris = document.getElementById("btn-giris-yap");
     if (btnGiris) {
-        btnGiris.addEventListener("click", () => {
+        btnGiris.addEventListener("click", (e) => {
+            e.preventDefault();
             const email = document.getElementById("giris-kullanici").value.trim();
             const sifre = document.getElementById("giris-sifre").value.trim();
 
@@ -57,30 +61,40 @@ document.addEventListener("DOMContentLoaded", () => {
                     alert("✅ Giriş Başarılı!");
                 })
                 .catch((error) => {
-                    alert("❌ Giriş Yapılamadı: " + error.message);
+                    alert("❌ Giriş Yapılamadı:\n" + error.message);
                 });
         });
     }
 
+    // 3. ÇIKIŞ YAP BUTONU
     const btnCikis = document.getElementById("btn-cikis-yap");
     if (btnCikis) {
-        btnCikis.addEventListener("click", () => auth.signOut());
+        btnCikis.addEventListener("click", (e) => {
+            e.preventDefault();
+            auth.signOut();
+        });
     }
 
-    // 3. MÜŞTERİ SORGULAMA İŞLEMİ
+    // 4. MÜŞTERİ SORGULAMA
     const btnSorgula = document.getElementById("btn-sorgula");
     if (btnSorgula) {
-        btnSorgula.addEventListener("click", sorgulaCihaz);
+        btnSorgula.addEventListener("click", (e) => {
+            e.preventDefault();
+            sorgulaCihaz();
+        });
     }
 
-    // 4. YENİ CİHAZ EKLEME (PANEL)
+    // 5. YENİ CİHAZ KAYDET
     const btnCihazEkle = document.getElementById("btn-cihaz-ekle");
     if (btnCihazEkle) {
-        btnCihazEkle.addEventListener("click", yeniCihazEkle);
+        btnCihazEkle.addEventListener("click", (e) => {
+            e.preventDefault();
+            yeniCihazEkle();
+        });
     }
 });
 
-// OTURUM DURUMU & YETKİLENDİRME TAKİBİ
+// OTURUM & YETKİLENDİRME DURUMU
 auth.onAuthStateChanged((user) => {
     const girisEkrani = document.getElementById("giris-ekrani");
     const panelIcerigi = document.getElementById("panel-icerigi");
@@ -90,7 +104,7 @@ auth.onAuthStateChanged((user) => {
         if (girisEkrani) girisEkrani.style.display = "none";
         if (panelIcerigi) panelIcerigi.style.display = "block";
         
-        // E-posta kontrolü ile Rol Belirleme (Yetki Sistemi)
+        // Admin Yetki Kontrolü
         if (user.email === "admin@desnet.com" || user.email.includes("admin")) {
             mevcutKullaniciRol = "admin";
         } else {
@@ -98,10 +112,10 @@ auth.onAuthStateChanged((user) => {
         }
 
         if (rolRozet) {
-            rolRozet.innerText = `Oturum: ${user.email} (${mevcutKullaniciRol.toUpperCase()})`;
+            rolRozet.innerText = `Oturum Açık: ${user.email} (${mevcutKullaniciRol.toUpperCase()})`;
         }
 
-        // Verileri Yükle
+        // Verileri Tabloya Çek
         cihazlariGetir();
     } else {
         if (girisEkrani) girisEkrani.style.display = "block";
@@ -109,20 +123,16 @@ auth.onAuthStateChanged((user) => {
     }
 });
 
-// CİHAZLARI GETİR VE TABLOYU DOLDUR
+// CİHAZLARI LİSTELEME
 function cihazlariGetir() {
     const tabloBody = document.getElementById("cihaz-tablo-body");
     if (!tabloBody) return;
 
     db.collection("cihazlar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
         tabloBody.innerHTML = "";
-        let toplam = 0, serviste = 0, teslim = 0;
 
         snapshot.forEach((doc) => {
             const data = doc.data();
-            toplam++;
-            if (data.durum === "Teslim Edildi") teslim++; else serviste++;
-
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td><b>${data.takipNo || doc.id}</b></td>
@@ -132,21 +142,50 @@ function cihazlariGetir() {
                 <td><span class="badge ${getDurumClass(data.durum)}">${data.durum}</span></td>
                 <td>${data.aciklama || '-'}</td>
                 <td>
-                    <button class="btn-print" onclick="cihazYazdir('${doc.id}')">🖨️ Fiş</button>
-                    ${mevcutKullaniciRol === "admin" ? `<button class="btn-sil" onclick="cihazSil('${doc.id}')">🗑️ Sil</button>` : ''}
+                    <button type="button" class="btn-print" onclick="cihazYazdir('${doc.id}')">🖨️ Fiş</button>
+                    ${mevcutKullaniciRol === "admin" ? `<button type="button" class="btn-sil" onclick="cihazSil('${doc.id}')">🗑️ Sil</button>` : ''}
                 </td>
             `;
             tabloBody.appendChild(tr);
         });
-
-        // İstatistik Alanlarını Güncelle (Varsa)
-        if (document.getElementById("toplam-cihaz")) document.getElementById("toplam-cihaz").innerText = toplam;
-        if (document.getElementById("servisteki-cihaz")) document.getElementById("servisteki-cihaz").innerText = serviste;
-        if (document.getElementById("teslim-cihaz")) document.getElementById("teslim-cihaz").innerText = teslim;
     });
 }
 
-// CİHAZ YAZDIRMA (SERVİS FİŞİ)
+// CİHAZ KAYDETME (SAYFA YENİLEMESİZ)
+function yeniCihazEkle() {
+    const musteri = document.getElementById("yeni-musteri").value.trim();
+    const cihaz = document.getElementById("yeni-cihaz").value.trim();
+    const seriNo = document.getElementById("yeni-seri").value.trim();
+    const durum = document.getElementById("yeni-durum").value;
+    const aciklama = document.getElementById("yeni-aciklama").value.trim();
+
+    if (!musteri || !cihaz) {
+        alert("Lütfen Müşteri ve Cihaz bilgilerini doldurun.");
+        return;
+    }
+
+    const takipNo = "DES-" + Math.floor(1000 + Math.random() * 9000);
+
+    db.collection("cihazlar").add({
+        takipNo: takipNo,
+        musteri: musteri,
+        cihaz: cihaz,
+        seriNo: seriNo,
+        durum: durum,
+        aciklama: aciklama,
+        tarih: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        alert("✅ Cihaz Başarıyla Kaydedildi!\nTakip No: " + takipNo);
+        document.getElementById("yeni-musteri").value = "";
+        document.getElementById("yeni-cihaz").value = "";
+        document.getElementById("yeni-seri").value = "";
+        document.getElementById("yeni-aciklama").value = "";
+    }).catch((err) => {
+        alert("❌ Kayıt Hatası: " + err.message);
+    });
+}
+
+// SERVİS FİŞİ YAZDIRMA
 function cihazYazdir(id) {
     db.collection("cihazlar").doc(id).get().then((doc) => {
         if (!doc.exists) return;
@@ -188,41 +227,7 @@ function cihazYazdir(id) {
     });
 }
 
-// YENİ CİHAZ EKLEME
-function yeniCihazEkle() {
-    const musteri = document.getElementById("yeni-musteri").value.trim();
-    const cihaz = document.getElementById("yeni-cihaz").value.trim();
-    const seriNo = document.getElementById("yeni-seri").value.trim();
-    const durum = document.getElementById("yeni-durum").value;
-    const aciklama = document.getElementById("yeni-aciklama").value.trim();
-
-    if (!musteri || !cihaz) {
-        alert("Lütfen Müşteri ve Cihaz bilgilerini doldurun.");
-        return;
-    }
-
-    const takipNo = "DES-" + Math.floor(1000 + Math.random() * 9000);
-
-    db.collection("cihazlar").add({
-        takipNo: takipNo,
-        musteri: musteri,
-        cihaz: cihaz,
-        seriNo: seriNo,
-        durum: durum,
-        aciklama: aciklama,
-        tarih: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        alert("✅ Cihaz Kaydedildi! Takip No: " + takipNo);
-        document.getElementById("yeni-musteri").value = "";
-        document.getElementById("yeni-cihaz").value = "";
-        document.getElementById("yeni-seri").value = "";
-        document.getElementById("yeni-aciklama").value = "";
-    }).catch((err) => {
-        alert("Hata: " + err.message);
-    });
-}
-
-// CİHAZ SİLME (Sadece Admin)
+// CİHAZ SİLME
 function cihazSil(id) {
     if (mevcutKullaniciRol !== "admin") {
         alert("⛔ Bu işlem için Admin yetkisi gerekiyor!");
@@ -236,7 +241,7 @@ function cihazSil(id) {
     }
 }
 
-// MÜŞTERİ SORGULAMA KODU
+// MÜŞTERİ SORGULAMA
 function sorgulaCihaz() {
     const kod = document.getElementById("sorgu-kod").value.trim();
     const sonucAlan = document.getElementById("sorgu-sonuc");
@@ -248,13 +253,13 @@ function sorgulaCihaz() {
 
     db.collection("cihazlar").where("takipNo", "==", kod).get().then((querySnapshot) => {
         if (querySnapshot.empty) {
-            sonucAlan.innerHTML = `<p style="color:red;">Kayıt bulunamadı. Lütfen numarayı kontrol edin.</p>`;
+            sonucAlan.innerHTML = `<p style="color:red; font-weight:bold;">Kayıt bulunamadı. Lütfen numarayı kontrol edin.</p>`;
         } else {
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 sonucAlan.innerHTML = `
-                    <div style="border:1px solid #ccc; padding:15px; border-radius:8px; background:#f9f9f9;">
-                        <h3>Cihaz Durumu: <span style="color:#2196F3;">${data.durum}</span></h3>
+                    <div style="border:1px solid #0056b3; padding:15px; border-radius:8px; background:#f4f8ff;">
+                        <h3 style="margin-top:0;">Cihaz Durumu: <span style="color:#2196F3;">${data.durum}</span></h3>
                         <p><strong>Müşteri:</strong> ${data.musteri}</p>
                         <p><strong>Cihaz:</strong> ${data.cihaz}</p>
                         <p><strong>Seri No:</strong> ${data.seriNo}</p>
