@@ -1,3 +1,4 @@
+/* GENEL SIFIRLAMA VE TEMEL BİLGİLER */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -8,208 +9,169 @@
 body {
     background-color: #f4f6f9;
     color: #333;
+    line-height: 1.6;
 }
 
+/* HEADER VE NAVİGASYON */
 header {
     background-color: #1a252f;
-    color: white;
+    color: #fff;
     padding: 15px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-nav .sekme-btn {
+header .logo {
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #3498db;
+}
+
+nav button {
     background: transparent;
-    border: none;
-    color: #a0aec0;
-    font-size: 16px;
+    border: 1px solid #3498db;
+    color: #3498db;
     padding: 8px 16px;
+    border-radius: 6px;
     cursor: pointer;
-    border-radius: 4px;
+    font-weight: 600;
+    margin-left: 10px;
     transition: all 0.3s ease;
 }
 
-nav .sekme-btn.active, nav .sekme-btn:hover {
-    color: white;
-    background-color: #2c3e50;
+nav button:hover, nav button.active {
+    background-color: #3498db;
+    color: #fff;
 }
 
-main {
+/* KONTEYNER VE KART YAPISI */
+.container {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.card {
+    background: #fff;
     padding: 25px;
-    max-width: 1300px;
-    margin: 0 auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
 }
 
-.sekme-icerik {
-    display: none;
+.card h2, .card h3 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+    border-bottom: 2px solid #eef2f5;
+    padding-bottom: 8px;
 }
 
-.sekme-icerik.active {
-    display: block;
-}
-
-.alt-sekme-btn {
-    background: #e2e8f0;
-    border: none;
-    padding: 10px 20px;
-    font-size: 15px;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-    color: #4a5568;
-    transition: all 0.2s;
-}
-
-.alt-sekme-btn.active {
-    background: #007bff;
-    color: white;
-}
-
-.sorgu-kutusu, .form-kapsayici, .liste-kapsayici {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
-}
-
-.arama-formu {
+/* FORM ELEMANLARI */
+.form-group {
     display: flex;
     gap: 10px;
     margin-top: 15px;
 }
 
-.arama-formu input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-}
-
-.btn-sorgula, .btn-kaydet {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.btn-sorgula:hover, .btn-kaydet:hover {
-    background-color: #0056b3;
-}
-
-.istatistik-kapsayici {
+.form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
-    margin-bottom: 20px;
 }
 
-.kart {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    border-bottom: 4px solid #ccc;
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
 }
 
-.kart-toplam { border-color: #17a2b8; }
-.kart-bekleyen { border-color: #ffc107; }
-.kart-islemde { border-color: #007bff; }
-.kart-tamamlanan { border-color: #28a745; }
-
-.kart h3 { font-size: 14px; color: #6c757d; }
-.kart p { font-size: 24px; font-weight: bold; margin-top: 5px; }
-
-.form-satir {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
+input:focus, select:focus, textarea:focus {
+    border-color: #3498db;
 }
 
-.form-satir input, .form-satir select {
-    flex: 1;
-    min-width: 180px;
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-}
-
-.aksesuar-alani {
-    align-items: center;
-    gap: 15px;
-}
-
-.panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.rol-rozet {
-    background-color: #e9ecef;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-weight: bold;
-    font-size: 13px;
-}
-
-.btn-cikis {
-    background-color: #dc3545;
-    color: white;
+/* BUTONLAR */
+button {
+    background-color: #3498db;
+    color: #fff;
     border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
+    padding: 10px 18px;
+    border-radius: 6px;
     cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
 }
 
-.tablo-sarmal {
-    overflow-x: auto;
+button:hover {
+    background-color: #2980b9;
+}
+
+.btn-sil {
+    background-color: #e74c3c !important;
+}
+
+.btn-sil:hover {
+    background-color: #c0392b !important;
+}
+
+.btn-print {
+    background-color: #2ecc71 !important;
+}
+
+.btn-print:hover {
+    background-color: #27ae60 !important;
+}
+
+/* TABLO TASARIMI */
+.table {
+    width: 100%;
+    border-collapse: collapse;
     margin-top: 15px;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
+.table th, .table td {
+    padding: 12px 15px;
     text-align: left;
-}
-
-th, td {
-    padding: 12px;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid #eef2f5;
     font-size: 14px;
 }
 
-th {
-    background-color: #f8f9fa;
-    color: #495057;
+.table th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
 }
 
-/* YAZICI/ETİKET STİLLERİ (50mm x 30mm) */
-@media print {
-    body * { visibility: hidden; }
-    #etiket-alani, #etiket-alani * { visibility: visible; }
-    #etiket-alani {
-        position: absolute;
-        left: 0; top: 0;
-        width: 50mm; height: 30mm;
-        padding: 1mm 2mm;
-        box-sizing: border-box;
-        font-family: Arial, sans-serif;
-    }
+/* ROZETLER (BADGE) */
+.badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
 }
 
-.yazdir-gizli { display: none; }
-@media print { .yazdir-gizli { display: block !important; } }
+.badge-warning {
+    background-color: #fef3c7;
+    color: #d97706;
+}
 
-.etiket-baslik { font-size: 8pt; font-weight: bold; border-bottom: 1px solid #000; text-align: center; }
-.etiket-govde { display: flex; justify-content: space-between; margin-top: 2px; }
-.etiket-sol { width: 58%; font-size: 7pt; }
-.etiket-sag { width: 40%; text-align: center; }
-.etiket-seri { font-size: 6pt; font-weight: bold; margin-top: 1px; }
+.badge-success {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.badge-danger {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
