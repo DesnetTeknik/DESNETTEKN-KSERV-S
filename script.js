@@ -130,14 +130,12 @@ auth.onAuthStateChanged((user) => {
         if (girisEkrani) girisEkrani.style.display = "none";
         if (panelIcerigi) panelIcerigi.style.display = "block";
 
-        // Giriş yapıldığı için Kargo ve Stok sekmelerini aç
         oturumSartliSekmeler.forEach(el => el.style.display = "inline-block");
 
-        // Kullanıcının Veritabanından Rolünü Sorgula
         db.collection("kullanicilar").doc(user.email).get().then((doc) => {
             if (doc.exists && doc.data().rol) {
                 mevcutKullaniciRol = doc.data().rol;
-            } else if (user.email === "admin@desnet.com") {
+            } else if (user.email === "admin@desnet.com" || user.email === "muhammed@desnet.com") {
                 mevcutKullaniciRol = "admin";
             } else {
                 mevcutKullaniciRol = "personel";
@@ -145,7 +143,6 @@ auth.onAuthStateChanged((user) => {
 
             if (rolRozet) rolRozet.innerText = `Oturum Açık: ${user.email} (${mevcutKullaniciRol.toUpperCase()})`;
 
-            // Sadece Admin ise Yetki Yönetimi sekmesini göster
             if (mevcutKullaniciRol === "admin") {
                 adminSartliSekmeler.forEach(el => el.style.display = "inline-block");
             } else {
@@ -159,13 +156,12 @@ auth.onAuthStateChanged((user) => {
         if (girisEkrani) girisEkrani.style.display = "block";
         if (panelIcerigi) panelIcerigi.style.display = "none";
 
-        // Çıkış yapıldığında oturum şartlı sekmeleri gizle
         oturumSartliSekmeler.forEach(el => el.style.display = "none");
         adminSartliSekmeler.forEach(el => el.style.display = "none");
     }
 });
 
-// YETKİ GÜNCELLEME / ATAMA
+// YETKİ GÜNCELLEME
 function yetkiGuncelle() {
     const email = document.getElementById("yetki-email").value.trim();
     const rol = document.getElementById("yetki-rol").value;
@@ -225,7 +221,7 @@ function cihazlariGetir() {
                 <td><span class="badge ${getDurumClass(data.durum)}">${data.durum}</span></td>
                 <td>${data.aciklama || '-'}</td>
                 <td>
-                    <button type="button" class="btn-print" onclick="cihazYazdir('${doc.id}')">Fiş</button>
+                    <button type="button" class="btn-print" onclick="cihazEtiketYazdir('${doc.id}')">Etiket Bas</button>
                     ${mevcutKullaniciRol === "admin" ? `<button type="button" class="btn-sil" onclick="cihazSil('${doc.id}')">Sil</button>` : ''}
                 </td>
             `;
@@ -254,6 +250,44 @@ function yeniCihazEkle() {
         document.getElementById("yeni-cihaz").value = "";
         document.getElementById("yeni-seri").value = "";
         document.getElementById("yeni-aciklama").value = "";
+    });
+}
+
+// 50x30mm ETİKET YAZDIRMA VE QR KOD OLUŞTURMA
+function cihazEtiketYazdir(id) {
+    db.collection("cihazlar").doc(id).get().then((doc) => {
+        if (!doc.exists) return;
+        const data = doc.data();
+
+        // 1. Verileri Doldur
+        document.getElementById("printServisNo").innerText = data.takipNo || "DES-0000";
+        document.getElementById("printMusteriAd").innerText = data.musteri || "-";
+        document.getElementById("printCihazModel").innerText = data.cihaz || "-";
+        document.getElementById("printSeriNo").innerText = data.seriNo || "-";
+        document.getElementById("printAriza").innerText = data.aciklama || "-";
+
+        const tarihObj = data.tarih ? data.tarih.toDate() : new Date();
+        document.getElementById("printTarih").innerText = tarihObj.toLocaleDateString("tr-TR");
+
+        // 2. QR Kodu Hazırla
+        const qrContainer = document.getElementById("qrcode");
+        qrContainer.innerHTML = "";
+
+        const qrMetni = `https://desnetteknik-66527.web.app/?sorgu=${data.takipNo}`;
+
+        new QRCode(qrContainer, {
+            text: qrMetni,
+            width: 128,
+            height: 128,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+        });
+
+        // 3. Çizim için bekleyip yazdır
+        setTimeout(() => {
+            window.print();
+        }, 250);
     });
 }
 
@@ -348,32 +382,6 @@ function cihazSil(id) {
     if (confirm("Silmek istediğinize emin misiniz?")) {
         db.collection("cihazlar").doc(id).delete();
     }
-}
-
-function cihazYazdir(id) {
-    db.collection("cihazlar").doc(id).get().then((doc) => {
-        if (!doc.exists) return;
-        const data = doc.data();
-        const win = window.open('', '_blank', 'width=600,height=600');
-        win.document.write(`
-            <html>
-            <head><title>Servis Fişi - ${data.takipNo}</title></head>
-            <body style="font-family: sans-serif; padding:20px;">
-                <h2>DESNET TEKNİK SERVİS FİŞİ</h2>
-                <hr>
-                <p><strong>Takip No:</strong> ${data.takipNo}</p>
-                <p><strong>Müşteri:</strong> ${data.musteri}</p>
-                <p><strong>Cihaz:</strong> ${data.cihaz}</p>
-                <p><strong>Seri No:</strong> ${data.seriNo}</p>
-                <p><strong>Durum:</strong> ${data.durum}</p>
-                <p><strong>Açıklama:</strong> ${data.aciklama}</p>
-            </body>
-            </html>
-        `);
-        win.document.close();
-        win.focus();
-        setTimeout(() => win.print(), 500);
-    });
 }
 
 function sorgulaCihaz() {
