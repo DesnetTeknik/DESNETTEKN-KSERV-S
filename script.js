@@ -8,6 +8,7 @@ const firebaseConfig = {
     appId: "1:200503339006:web:0e940ae8a383a802a042af"
 };
 
+// Firebase Başlatma
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
@@ -104,7 +105,6 @@ auth.onAuthStateChanged((user) => {
         if (girisEkrani) girisEkrani.style.display = "none";
         if (panelIcerigi) panelIcerigi.style.display = "block";
         
-        // Admin Yetki Kontrolü
         if (user.email === "admin@desnet.com" || user.email.includes("admin")) {
             mevcutKullaniciRol = "admin";
         } else {
@@ -115,7 +115,6 @@ auth.onAuthStateChanged((user) => {
             rolRozet.innerText = `Oturum Açık: ${user.email} (${mevcutKullaniciRol.toUpperCase()})`;
         }
 
-        // Verileri Tabloya Çek
         cihazlariGetir();
     } else {
         if (girisEkrani) girisEkrani.style.display = "block";
@@ -148,10 +147,12 @@ function cihazlariGetir() {
             `;
             tabloBody.appendChild(tr);
         });
+    }, (err) => {
+        console.error("Veri çekme hatası:", err);
     });
 }
 
-// CİHAZ KAYDETME (SAYFA YENİLEMESİZ)
+// CİHAZ KAYDETME
 function yeniCihazEkle() {
     const musteri = document.getElementById("yeni-musteri").value.trim();
     const cihaz = document.getElementById("yeni-cihaz").value.trim();
