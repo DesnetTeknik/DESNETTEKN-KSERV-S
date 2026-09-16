@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Desnet Teknik Servis & Yönetim Paneli</title>
     <link rel="stylesheet" href="style.css">
+    
     <!-- Firebase SDK (v8) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
+    <!-- QR Code Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -18,11 +22,8 @@
             <img src="logo.png" alt="Desnet Logo" class="main-logo">
         </div>
         <nav>
-            <!-- İlk Açılışta Sadece Bu İkisi Görünür -->
             <button id="btn-sorgula-sekme" class="active">Müşteri Sorgulama</button>
             <button id="btn-panel-sekme">Yönetici Paneli</button>
-
-            <!-- Giriş Yapınca Açılan Sekmeler -->
             <button id="btn-kargo-sekme" class="oturum-sartli" style="display: none;">Kargo Takip</button>
             <button id="btn-stok-sekme" class="oturum-sartli" style="display: none;">Stok Yönetimi</button>
             <button id="btn-yetki-sekme" class="admin-sartli" style="display: none;">Yetki Yönetimi</button>
@@ -31,7 +32,7 @@
 
     <div class="container">
 
-        <!-- 1. MÜŞTERİ SORGULAMA SAYFASI (VARSAYILAN AÇILIŞ) -->
+        <!-- 1. MÜŞTERİ SORGULAMA SAYFASI -->
         <div id="sorgulama-sayfasi">
             <div class="card">
                 <h2>🔍 Cihaz Durum Sorgulama</h2>
@@ -208,6 +209,25 @@
 
     </div>
 
-    <script src="script.js?v=2026_v3"></script>
+    <!-- 50x30mm TERMAL ETİKET ALANI (YAZICIYA ÖZEL GİZLİ ŞABLON) -->
+    <div id="yazdirAlani">
+        <div class="etiket-sol">
+            <div class="etiket-header">
+                <span id="printServisNo">DES-0000</span>
+                <span id="printTarih" class="tarih-span">00.00.0000</span>
+            </div>
+            <div class="etiket-body">
+                <div class="satir"><span class="lbl">Müşteri:</span> <span id="printMusteriAd">-</span></div>
+                <div class="satir"><span class="lbl">Cihaz:</span> <span id="printCihazModel">-</span></div>
+                <div class="satir"><span class="lbl">S/N:</span> <span id="printSeriNo">-</span></div>
+                <div class="satir"><span class="lbl">Arıza:</span> <span id="printAriza">-</span></div>
+            </div>
+        </div>
+        <div class="etiket-sag">
+            <div id="qrcode"></div>
+        </div>
+    </div>
+
+    <script src="script.js?v=2026_v4"></script>
 </body>
 </html>
