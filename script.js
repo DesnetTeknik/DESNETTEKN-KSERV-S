@@ -1,4 +1,4 @@
-// FIREBASE YAPILANDIRMASI (Senin Özel API Key'in İle)
+// FIREBASE YAPILANDIRMASI
 const firebaseConfig = {
     apiKey: "AIzaSyCjVuS94dkxNLPfp04Eqgty0sj7Xo0qc6s",
     authDomain: "desnetteknik-66527.firebaseapp.com",
